@@ -29,7 +29,7 @@ export const broadcast = async (req: Request): Promise<BroadcastSlot[]> => {
         channelId: slot.channelId,
         title: slot.title,
         startAt: slot.startAt,
-        duration: slot.endAt - slot.endAt,
+        duration: slot.endAt - slot.startAt,
         mark: [
             ...Object.keys(slot.mark).filter(key => slot.mark[key]),
             ...Object.keys(slot.flags).filter(key => slot.flags[key])
