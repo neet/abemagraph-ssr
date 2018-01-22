@@ -67,7 +67,7 @@ module.exports = {
             }
         }),
         new webpack.optimize.CommonsChunkPlugin({
-            name: 'vendor',
+            name: 'loader',
             minChunks: Infinity,
         }),
         new webpack.ProvidePlugin({
