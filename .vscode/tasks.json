@@ -1,0 +1,28 @@
+{
+    "tasks": [
+        {
+            "taskName": "build",
+            "suppressTaskName": true,
+            "isBuildCommand": true,
+            "command": "tsc",
+            "isShellCommand": true,
+            "showOutput": "silent",
+            "args": [
+                "-p",
+                "."
+            ],
+            "problemMatcher": "$tsc"
+        },
+        {
+            "taskName": "build-css",
+            "suppressTaskName": true,
+            "isBuildCommand": false,
+            "command": "stylus",
+            "isShellCommand": true,
+            "args": [
+                "styles/**/*.css"
+            ]
+        }
+    ],
+    "version": "0.1.0"
+}

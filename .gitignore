@@ -1,0 +1,5 @@
+config.*
+timetable.json
+node_modules/
+assets/
+bin/
