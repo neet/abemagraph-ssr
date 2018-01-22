@@ -6,6 +6,7 @@ import Current from './routes/Current';
 import { Footer } from './components/Footer';
 import { Container } from './components/Container';
 import { StatusCode } from './components/StatusCode';
+import { NotFound } from './routes/NotFound';
 
 export class Routes extends React.Component {
     render() {
@@ -15,7 +16,7 @@ export class Routes extends React.Component {
                 <Container>
                     <Switch>
                         <Route path='/' exact component={Current} />
-                        <Route render={() => <StatusCode code={404}>404</StatusCode>} />
+                        <Route component={NotFound} />
                     </Switch>
                     <Footer />
                 </Container>
