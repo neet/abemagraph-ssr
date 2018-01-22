@@ -15,12 +15,9 @@ import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './app.styl';
 
-const initialTag = document.getElementById('initial-data');
 let initialState = {};
-if (initialTag) {
-    const initialJSON = initialTag.getAttribute('data-json');
-    if (initialJSON)
-        initialState = JSON.parse(initialJSON);
+if (window['__INITIAL_STATE__']) {
+    initialState = window['__INITIAL_STATE__'];
 }
 const store = createStore(reducers, initialState, applyMiddleware(thunk));
 
