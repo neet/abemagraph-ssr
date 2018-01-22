@@ -36,8 +36,8 @@ export const renderSSR = async (req: Request, res: Response) => {
                     </Provider>
                 </div>
                 <div id='initial-data' data-json={JSON.stringify(store.getState())} />
-                <script src='/assets/vendor.js' />
-                <script src='/assets/app.js' />
+                <script async defer src='/assets/vendor.js' />
+                <script async defer src='/assets/app.js' />
             </body>
         </html>
     );
