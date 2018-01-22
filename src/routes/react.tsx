@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { renderToNodeStream } from 'react-dom/server';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { Request, Response } from 'express';
 import { StaticRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
@@ -10,7 +10,7 @@ import reducers from '../views/reducers';
 import { broadcast } from './api/index';
 
 export const renderSSR = async (req: Request, res: Response) => {
-    res.contentType('text/html').status(200);
+    res.contentType('text/html');
 
     const store = createStore(reducers, {
         app: {
@@ -18,7 +18,10 @@ export const renderSSR = async (req: Request, res: Response) => {
             broadcastSlotUpdated: Date.now()
         }
     });
-    renderToNodeStream(
+    const context: { url?: string, status: number } = {
+        status: 200
+    };
+    const markup = renderToStaticMarkup(
         <html lang='ja'>
             <head>
                 <title>AbemaGraph</title>
@@ -27,7 +30,7 @@ export const renderSSR = async (req: Request, res: Response) => {
             <body>
                 <div id='app'>
                     <Provider store={store}>
-                        <StaticRouter location={req.url} context={{}}>
+                        <StaticRouter location={req.url} context={context}>
                             <Routes />
                         </StaticRouter>
                     </Provider>
@@ -37,5 +40,11 @@ export const renderSSR = async (req: Request, res: Response) => {
                 <script src='/assets/app.js' />
             </body>
         </html>
-    ).pipe(res);
+    );
+    if (context.url) {
+        res.redirect(context.url);
+    } else {
+        res.status(context.status);
+        res.end(markup);
+    }
 };
