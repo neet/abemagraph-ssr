@@ -3,6 +3,8 @@ import { MongoClient } from 'mongodb';
 import * as LRU from 'lru-cache';
 import * as fs from 'fs';
 
+import 'moment/locale/ja';
+
 import Config from './config';
 import { downloadTimetable } from './collector/timetable';
 import { Collector } from './collector/index';
