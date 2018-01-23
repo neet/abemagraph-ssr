@@ -17,8 +17,8 @@ export const broadcast = async (req: Request): Promise<BroadcastSlot[]> => {
             return {
                 ...obj,
                 [key]: {
-                    comment: logs[key].log[lastKey].c,
-                    view: logs[key].log[lastKey].v,
+                    comment: logs[key].log[lastKey].c || 0,
+                    view: logs[key].log[lastKey].v || 0,
                     updated: Number(lastKey)
                 }
             };
