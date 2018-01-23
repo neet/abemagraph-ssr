@@ -1,10 +1,10 @@
 import { BroadcastSlot } from '../../types/abemagraph';
 
-export interface StoreApp {
+export interface StoreBroadcast {
     broadcastSlots: BroadcastSlot[];
     broadcastSlotUpdated: number;
 }
 
 export interface Store {
-    app: StoreApp;
+    broadcast: StoreBroadcast;
 }

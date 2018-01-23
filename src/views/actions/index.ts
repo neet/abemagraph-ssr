@@ -1,4 +1,4 @@
-import * as app from './app';
+import * as broadcast from './broadcast';
 
-export default { app };
-export type Actions = app.Actions;
+export default { broadcast };
+export type Actions = broadcast.Actions;

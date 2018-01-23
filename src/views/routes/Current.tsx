@@ -10,10 +10,10 @@ import { BroadcastSlot } from '../../types/abemagraph';
 import { Link } from 'react-router-dom';
 
 
-class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], updated: number }>>{
+class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elapsedFromUpdate: number }>>{
     componentDidMount() {
-        if (this.props.updated > 60 * 1000)
-            this.props.actions.app.fetchBroadcastSlots();
+        if (this.props.elapsedFromUpdate > 60 * 1000)
+            this.props.actions.broadcast.fetchBroadcastSlots();
     }
 
     render() {
@@ -54,7 +54,7 @@ class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], updat
     }
 }
 
-export default connect<{ slots: BroadcastSlot[], updated: number }>({
-    slots: state => state.app.broadcastSlots,
-    updated: state => Date.now() - state.app.broadcastSlotUpdated
+export default connect<{ slots: BroadcastSlot[], elapsedFromUpdate: number }>({
+    slots: state => state.broadcast.broadcastSlots,
+    elapsedFromUpdate: state => Date.now() - state.broadcast.broadcastSlotUpdated
 })(pure(Current));
