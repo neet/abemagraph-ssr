@@ -1,4 +1,5 @@
 abema-color = #6fb900
+abema-color-light = rgba(111,185,0,.6)
 header
     height 50px
 .center
@@ -11,3 +12,8 @@ mark
 	background rgba(111,185,0,.2)
 .label-success
 	background abema-color
+.form-control:focus
+	border-color abema-color
+	outline 0
+	-webkit-box-shadow inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px abema-color-light
+	box-shadow inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px abema-color-light
