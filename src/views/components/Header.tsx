@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Glyphicon } from './Glyphicon';
 import { Container } from './Container';
+import { NavLink } from './NavLink';
 
 export const Header = () => (
     <header>
@@ -17,33 +18,21 @@ export const Header = () => (
                 </div>
                 <div className='collapse navbar-collapse' id='navbar-main'>
                     <ul className='nav navbar-nav'>
-                        <li>
-                            <NavLink to='/'>トップページ</NavLink>
-                        </li>
-                        <li>
-                            <NavLink to='/all'><Glyphicon glyph='stats' /> 全体統計</NavLink>
-                        </li>
+                        <NavLink to='/'>トップページ</NavLink>
+                        <NavLink to='/all'><Glyphicon glyph='stats' /> 全体統計</NavLink>
                     </ul>
                     <ul className='nav navbar-nav navbar-right'>
-                        <li>
-                            <NavLink to='/status'>ステータス</NavLink>
-                        </li>
+                        <NavLink to='/status'>ステータス</NavLink>
                         <li className='dropdown'>
                             <a href='#' className='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
                                 <Glyphicon glyph='calendar' /> 番組表
                                 <span className='caret' />
                             </a>
                             <ul className='dropdown-menu'>
-                                <li>
-                                    <NavLink to='/notification'><Glyphicon glyph='bell' /> 通知</NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to='/timetable'><Glyphicon glyph='calendar' /> 番組表</NavLink>
-                                </li>
+                                <NavLink to='/notification'><Glyphicon glyph='bell' /> 通知</NavLink>
+                                <NavLink to='/timetable'><Glyphicon glyph='calendar' /> 番組表</NavLink>
                                 <li className='divider' role='separator' />
-                                <li>
-                                    <NavLink to='/search'><Glyphicon glyph='search' /> 検索</NavLink>
-                                </li>
+                                <NavLink to='/search'><Glyphicon glyph='search' /> 検索</NavLink>
                             </ul>
                         </li>
                     </ul>
