@@ -114,6 +114,18 @@ export class Collector {
         appLogger.debug('Slot status collected');
     }
 
+    get channels() {
+        if (this.timetable)
+            return this.timetable.channels;
+        else
+            return null;
+    }
+
+    async getChannel(...names: string[]): Promise<Channel[]> {
+        const cursor = await this.channelsDb.find({ $or: names.map(name => ({ _id: name })) });
+        return await cursor.toArray();
+    }
+    
     async findLogs(...slotIds: string[]): Promise<{ [slot: string]: Log }> {
         const cursor = await this.logsDb.find({ $or: slotIds.map(_id => ({ _id })) });
         const result = await cursor.toArray();
@@ -142,7 +154,7 @@ export class Collector {
     }
 
     async stopSchedule() {
-        if(!this.cancel) return;
+        if (!this.cancel) return;
         appLogger.info('Scheduler stopping');
         this.cancel();
         await Promise.all(this.promises);

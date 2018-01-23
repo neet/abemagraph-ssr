@@ -7,7 +7,7 @@ import { createStore } from 'redux';
 
 import { Routes } from '../views/Routes';
 import reducers from '../views/reducers';
-import { broadcast } from './api/index';
+import { broadcast, broadcastChannels } from './api/index';
 
 export const renderSSR = async (req: Request, res: Response) => {
     res.contentType('text/html');
@@ -16,6 +16,9 @@ export const renderSSR = async (req: Request, res: Response) => {
         broadcast: {
             broadcastSlots: await broadcast(req),
             broadcastSlotUpdated: Date.now()
+        },
+        app: {
+            channels: broadcastChannels(req)
         }
     });
     const context: { url?: string, status: number, title: string } = {

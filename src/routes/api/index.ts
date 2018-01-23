@@ -3,6 +3,7 @@ import { Collector } from '../../collector';
 
 import * as _ from 'lodash';
 import { Stats, BroadcastSlot } from '../../types/abemagraph';
+import { Channel } from '../../types/abema';
 
 const router = Router();
 
@@ -38,8 +39,21 @@ export const broadcast = async (req: Request): Promise<BroadcastSlot[]> => {
     }));
 };
 
+export const broadcastChannels = (req: Request): Channel[] => {
+    const collector = req.app.get('collector') as Collector;
+    const channels = collector.channels;
+    if (channels)
+        return channels.map(channel => ({ id: channel.id, name: channel.name.replace(/チャンネル$/, '') })) || [];
+    else
+        return [];
+};
+
 router.get('/broadcast', async (req, res, next) => {
     res.json(await broadcast(req)).end();
+});
+
+router.get('/broadcast/channels', async (req, res, next) => {
+    res.json(broadcastChannels(req)).end();
 });
 
 export default router;

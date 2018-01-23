@@ -9,18 +9,32 @@ import { BroadcastSlot } from '../../types/abemagraph';
 import { Link } from 'react-router-dom';
 import { Title } from '../components/RouterControl';
 import { Glyphicon } from '../components/Glyphicon';
+import { Channel } from '../../types/abema';
 
 
-class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elapsedFromUpdate: number, now: number }>>{
+class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elapsedFromUpdate: number, channels: Channel[] }>, { mounted: boolean }>{
+    constructor(props) {
+        super(props);
+        this.state = { mounted: false };
+    }
+
     componentDidMount() {
-        this.props.actions.app.setCurrentTs();
+        if (this.props.slots.length > 0 && this.props.channels.length > 0 && this.props.channels.length !== this.props.slots.length)
+            this.props.actions.app.fetchChannels();
         if (this.props.elapsedFromUpdate > 60 * 1000)
             this.props.actions.broadcast.fetchBroadcastSlots();
+        this.setState({ mounted: true });
     }
 
     render() {
         if (this.props.slots.length > 0) {
-            const { now, slots } = this.props;
+            const { slots } = this.props;
+            const { mounted } = this.state;
+            const findChannelName = (channelId: string) => {
+                const channel = this.props.channels.find(ch => ch.id === channelId);
+                return channel ? channel.name : channelId;
+            };
+            const now = Date.now() / 1000;
             return (
                 <div>
                     <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
@@ -45,28 +59,28 @@ class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elaps
                             <Link to={`/details/${slot.id}`} className='list-group-item' key={slot.id}>
                                 <h4 className='list-group-item-heading'>
                                     {slot.title}
-                                    <span className='pull-right label label-success'>{slot.channelId}</span>
+                                    <span className='pull-right label label-success'>{findChannelName(slot.channelId)}</span>
                                 </h4>
                                 <p className='list-group-item-text'>
                                     <span>{`${moment.unix(slot.startAt).format('YYYY/MM/DD(ddd) HH:mm:ss')} ~ ${moment.unix(slot.startAt + slot.duration).format('HH:mm:ss')}`}</span>
                                     <br />
                                     {slot.stats ? (
-                                        `閲覧数:${slot.stats.view} (${(slot.stats.view / (now - slot.startAt) * 60).toFixed(2)} vpm) ` +
-                                        `コメント:${slot.stats.comment} (${(slot.stats.comment / (now - slot.startAt) * 60).toFixed(2)} cpm)`
-                                    ) : '閲覧数: - (-vpm) コメント: - (-cpm)'}
+                                        `閲覧数:${slot.stats.view} (${mounted ? (slot.stats.view / (now - slot.startAt) * 60).toFixed(2) : '-'} vpm) ` +
+                                        `コメント:${slot.stats.comment} (${mounted ? (slot.stats.comment / (now - slot.startAt) * 60).toFixed(2) : '-'} cpm)`
+                                    ) : '閲覧数: - (- vpm) コメント: - (- cpm)'}
                                 </p>
                             </Link>
                         ))}
                     </div>
-                </div>
+                </div >
             );
         }
         return null;
     }
 }
 
-export default connect<{ slots: BroadcastSlot[], elapsedFromUpdate: number, now: number }>({
+export default connect<{ slots: BroadcastSlot[], elapsedFromUpdate: number, channels: Channel[] }>({
     slots: state => state.broadcast.broadcastSlots,
     elapsedFromUpdate: state => Date.now() - state.broadcast.broadcastSlotUpdated,
-    now: state => state.app.currentTs / 1000
+    channels: state => state.app.channels
 })(pure(Current));

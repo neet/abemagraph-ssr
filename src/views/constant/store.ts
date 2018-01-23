@@ -1,4 +1,5 @@
 import { BroadcastSlot } from '../../types/abemagraph';
+import { Channel } from '../../types/abema';
 
 export interface StoreBroadcast {
     broadcastSlots: BroadcastSlot[];
@@ -6,7 +7,7 @@ export interface StoreBroadcast {
 }
 
 export interface StoreApp {
-    currentTs: number;
+    channels: Channel[];
 }
 
 
