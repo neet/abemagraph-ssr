@@ -5,6 +5,12 @@ export interface StoreBroadcast {
     broadcastSlotUpdated: number;
 }
 
+export interface StoreApp {
+    currentTs: number;
+}
+
+
 export interface Store {
+    app: StoreApp;
     broadcast: StoreBroadcast;
 }
