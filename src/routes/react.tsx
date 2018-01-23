@@ -36,9 +36,9 @@ export const renderSSR = async (req: Request, res: Response) => {
                     </Provider>
                 </div>
                 <script dangerouslySetInnerHTML={{ __html: `window.__INITIAL_STATE__ = ${JSON.stringify(store.getState())}` }} />
-                <script src='/assets/loader.js' />
-                <script async defer src='/assets/vendor.js' />
-                <script async defer src='/assets/app.js' />
+                <script src='/assets/manifest.js' />
+                <script defer src='/assets/vendor.js' />
+                <script defer src='/assets/app.js' />
             </body>
         </html>
     );

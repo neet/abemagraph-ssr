@@ -58,7 +58,6 @@ module.exports = {
         ]
     },
     plugins: [
-        new ExtractTestPlugin('app.css'),
         new webpack.NamedModulesPlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
         new webpack.LoaderOptionsPlugin({
@@ -66,8 +65,13 @@ module.exports = {
                 use: poststylus(['autoprefixer'])
             }
         }),
+        new ExtractTestPlugin('app.css'),
         new webpack.optimize.CommonsChunkPlugin({
-            name: 'loader',
+            name: 'vendor',
+            minChunks: Infinity
+        }),
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'manifest',
             minChunks: Infinity,
         }),
         new webpack.ProvidePlugin({
