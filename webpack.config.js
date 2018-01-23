@@ -5,9 +5,9 @@ const ExtractTestPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
     entry: {
-        vendor: ['babel-polyfill', 'react', 'react-dom', 'react-bootstrap',
-            'jquery', 'redux', 'react-redux', 'recompose', 'moment', 'bootstrap', 'react-router-dom',
-            'redux-actions', 'lodash-es', 'react-router-bootstrap', 'tslib'],
+        vendor: ['babel-polyfill', 'react', 'react-dom', 'react-router-dom',
+            'jquery', 'redux', 'react-redux', 'recompose', 'moment', 'bootstrap',
+            'redux-actions', 'lodash-es', 'tslib'],
         app: ['./src/views/index.tsx']
     },
     output: {

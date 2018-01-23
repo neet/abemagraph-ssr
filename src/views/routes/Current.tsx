@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { ListGroup, Glyphicon } from 'react-bootstrap';
 import { pure } from 'recompose';
 import * as moment from 'moment';
 
@@ -9,6 +8,7 @@ import { ReduxProps, connect } from '../utils/connect';
 import { BroadcastSlot } from '../../types/abemagraph';
 import { Link } from 'react-router-dom';
 import { Title } from '../components/RouterControl';
+import { Glyphicon } from '../components/Glyphicon';
 
 
 class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elapsedFromUpdate: number }>>{
@@ -31,8 +31,8 @@ class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elaps
                         <dt>総コメント数 <Glyphicon glyph='comment' /></dt>
                         <dd>{this.props.slots.reduce((total, item) => total += item.stats ? item.stats.comment : 0, 0)}</dd>
                     </dl>
-                    <ListGroup>
                         {this.props.slots.map(slot => (
+                    <div className='list-group'>
                             <Link to={`/details/${slot.id}`} className='list-group-item' key={slot.id}>
                                 <h4 className='list-group-item-heading'>
                                     {slot.title}
@@ -48,7 +48,7 @@ class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elaps
                                 </p>
                             </Link>
                         ))}
-                    </ListGroup>
+                    </div>
                 </div>
             );
         }
