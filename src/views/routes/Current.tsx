@@ -8,7 +8,7 @@ import { PageHeader } from '../components/PageHeader';
 import { ReduxProps, connect } from '../utils/connect';
 import { BroadcastSlot } from '../../types/abemagraph';
 import { Link } from 'react-router-dom';
-import { Title } from '../components/Title';
+import { Title } from '../components/RouterControl';
 
 
 class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elapsedFromUpdate: number }>>{

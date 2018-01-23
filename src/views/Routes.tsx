@@ -5,7 +5,6 @@ import { Header } from './components/Header';
 import Current from './routes/Current';
 import { Footer } from './components/Footer';
 import { Container } from './components/Container';
-import { StatusCode } from './components/StatusCode';
 import { NotFound } from './routes/NotFound';
 
 export class Routes extends React.Component {

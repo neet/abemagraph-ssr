@@ -11,3 +11,10 @@ export const Title = ({ title }) => (
         return null;
     }} />
 );
+export const StatusCode = ({ code }) => (
+    <Route render={({ staticContext }) => {
+        if (staticContext)
+            staticContext.status = code;
+        return null;
+    }} />
+);
