@@ -8,6 +8,7 @@ import { PageHeader } from '../components/PageHeader';
 import { ReduxProps, connect } from '../utils/connect';
 import { BroadcastSlot } from '../../types/abemagraph';
 import { Link } from 'react-router-dom';
+import { Title } from '../components/Title';
 
 
 class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elapsedFromUpdate: number }>>{
@@ -21,6 +22,7 @@ class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elaps
             const now = Math.floor(Date.now() / 1000);
             return (
                 <div>
+                    <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
                     <PageHeader text='現在放送中の番組'>
                     </PageHeader>
                     <dl className='dl-horizontal'>
