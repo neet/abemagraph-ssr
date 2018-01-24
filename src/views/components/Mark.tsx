@@ -6,7 +6,8 @@ const markName = {
     live: '生',
     bingeWatching: '一挙',
     recommendation: '注目',
-    drm: 'DRM'
+    drm: 'DRM',
+    newcomer: '新'
 };
 
 export const Mark = ({ mark, showItem }: { mark: string[], showItem: string[] }) =>
