@@ -93,7 +93,7 @@ class Current extends React.Component<ReduxProps<{
                         {slots.map(slot => (
                             <Link to={`/details/${slot.id}`} className='list-group-item' key={slot.id}>
                                 <h4 className='list-group-item-heading'>
-                                    <Mark mark={slot.mark} showItem={['first', 'last', 'bingeWatching']} />
+                                    <Mark mark={slot.mark} showItem={['first', 'last', 'live', 'bingeWatching']} />
                                     {slot.title}
                                     <span className='pull-right label label-success'>{this.findChannelName(slot.channelId)}</span>
                                 </h4>
