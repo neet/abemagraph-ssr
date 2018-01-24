@@ -11,16 +11,17 @@ import { Title } from '../components/RouterControl';
 import { Glyphicon } from '../components/Glyphicon';
 import { Channel } from '../../types/abema';
 import { Mark } from '../components/Mark';
+import { parse } from '../utils/querystring';
 
-
+type Sort = 'v' | 'c' | 'vpm' | 'cpm';
 class Current extends React.Component<ReduxProps<{
     slots: BroadcastSlot[],
     elapsedFromUpdate: number,
     channels: Channel[]
-}> & RouteComponentProps<{}>, { mounted: boolean }>{
+}> & RouteComponentProps<{}>, { mounted: boolean, sortBy: Sort }>{
     constructor(props) {
         super(props);
-        this.state = { mounted: false };
+        this.state = { mounted: false, sortBy: 'vpm' };
     }
 
     componentDidMount() {
@@ -29,15 +30,45 @@ class Current extends React.Component<ReduxProps<{
         if (this.props.elapsedFromUpdate > 60 * 1000)
             this.props.actions.broadcast.fetchBroadcastSlots();
         this.setState({ mounted: true });
+        this.setSortBy();
+    }
+
+    componentDidUpdate(prevProps: RouteComponentProps<{}>) {
+        if (prevProps.location.search !== this.props.location.search) {
+            this.setSortBy();
+        }
+    }
+
+    private setSortBy() {
+        if (this.props.location.search) {
+            const search: { sort?: Sort } = parse(this.props.location.search);
+            if (search.sort && this.state.sortBy !== search.sort && ['v', 'c', 'vpm', 'cpm'].indexOf(search.sort) >= 0) {
+                this.setState({ sortBy: search.sort });
+            }
+        }
     }
     private findChannelName(channelId: string) {
         const channel = this.props.channels.find(ch => ch.id === channelId);
         return channel ? channel.name : channelId;
     }
     render() {
-        const { slots } = this.props;
-        const { mounted } = this.state;
         const now = Date.now() / 1000;
+        const { mounted, sortBy } = this.state;
+        const slots = this.props.slots.map(slot => ({
+            ...slot,
+            stats: slot.stats || { view: 0, comment: 0, updated: now },
+            vpm: slot.stats ? slot.stats.view / (now - slot.startAt) * 60 : 0,
+            cpm: slot.stats ? slot.stats.comment / (now - slot.startAt) * 60 : 0
+        })).sort((a, b) => {
+            if (sortBy === 'v')
+                return b.stats.view - a.stats.view;
+            else if (sortBy === 'c')
+                return b.stats.comment - a.stats.comment;
+            else if (sortBy === 'cpm')
+                return b.cpm - a.cpm;
+            else
+                return b.vpm - a.vpm;
+        });
         return (
             <React.Fragment>
                 <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
@@ -70,8 +101,8 @@ class Current extends React.Component<ReduxProps<{
                                     {`${moment.unix(slot.startAt).format('YYYY/MM/DD(ddd) HH:mm:ss')} ~ ${moment.unix(slot.startAt + slot.duration).format('HH:mm:ss')}`}
                                     <br />
                                     {slot.stats ? (
-                                        `閲覧数:${slot.stats.view} (${mounted ? (slot.stats.view / (now - slot.startAt) * 60).toFixed(2) : '-'} vpm) ` +
-                                        `コメント:${slot.stats.comment} (${mounted ? (slot.stats.comment / (now - slot.startAt) * 60).toFixed(2) : '-'} cpm)`
+                                        `閲覧数:${slot.stats.view} (${mounted ? slot.vpm.toFixed(2) : '-'} vpm) ` +
+                                        `コメント:${slot.stats.comment} (${mounted ? slot.cpm.toFixed(2) : '-'} cpm)`
                                     ) : '閲覧数: - (- vpm) コメント: - (- cpm)'}
                                 </p>
                             </Link>
