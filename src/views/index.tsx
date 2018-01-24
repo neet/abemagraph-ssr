@@ -25,9 +25,7 @@ const store = createStore(reducers, initialState, applyMiddleware(thunk));
 hydrate((
     <Provider store={store}>
         <Router>
-            <Switch>
-                <Routes />
-            </Switch>
+            <Routes />
         </Router>
     </Provider>
 ), document.getElementById('app'));
