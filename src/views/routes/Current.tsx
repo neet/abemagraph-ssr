@@ -10,6 +10,7 @@ import { Link, withRouter, RouteComponentProps } from 'react-router-dom';
 import { Title } from '../components/RouterControl';
 import { Glyphicon } from '../components/Glyphicon';
 import { Channel } from '../../types/abema';
+import { Mark } from '../components/Mark';
 
 
 class Current extends React.Component<ReduxProps<{
@@ -61,6 +62,7 @@ class Current extends React.Component<ReduxProps<{
                         {slots.map(slot => (
                             <Link to={`/details/${slot.id}`} className='list-group-item' key={slot.id}>
                                 <h4 className='list-group-item-heading'>
+                                    <Mark mark={slot.mark} showItem={['first', 'last', 'bingeWatching']} />
                                     {slot.title}
                                     <span className='pull-right label label-success'>{this.findChannelName(slot.channelId)}</span>
                                 </h4>

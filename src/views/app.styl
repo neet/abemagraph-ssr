@@ -1,5 +1,7 @@
 abema-color = #6fb900
 abema-color-light = rgba(111,185,0,.6)
+abema-color-light2 = rgba(111,185,0,.2)
+abema-color-light3 = rgba(111,185,0,.1)
 header
     height 50px
 .center
@@ -9,7 +11,7 @@ header
     border-radius 0 !important
 mark
 	padding 0
-	background rgba(111,185,0,.2)
+	background abema-color-light2
 .label-success
 	background abema-color
 .form-control:focus
@@ -17,3 +19,10 @@ mark
 	outline 0
 	-webkit-box-shadow inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px abema-color-light
 	box-shadow inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px abema-color-light
+h3 > mark, dd > mark, .list-group-item-heading > mark, .slot mark
+	border 1.5px solid abema-color-light3
+	border-radius 2px
+	font-weight 600
+	text-decoration none
+	margin-right 3px
+    padding .5px
