@@ -29,14 +29,13 @@ class Current extends React.Component<ReduxProps<{
             this.props.actions.broadcast.fetchBroadcastSlots();
         this.setState({ mounted: true });
     }
-
+    private findChannelName(channelId: string) {
+        const channel = this.props.channels.find(ch => ch.id === channelId);
+        return channel ? channel.name : channelId;
+    }
     render() {
         const { slots } = this.props;
         const { mounted } = this.state;
-        const findChannelName = (channelId: string) => {
-            const channel = this.props.channels.find(ch => ch.id === channelId);
-            return channel ? channel.name : channelId;
-        };
         const now = Date.now() / 1000;
         return (
             <div>
@@ -63,7 +62,7 @@ class Current extends React.Component<ReduxProps<{
                             <Link to={`/details/${slot.id}`} className='list-group-item' key={slot.id}>
                                 <h4 className='list-group-item-heading'>
                                     {slot.title}
-                                    <span className='pull-right label label-success'>{findChannelName(slot.channelId)}</span>
+                                    <span className='pull-right label label-success'>{this.findChannelName(slot.channelId)}</span>
                                 </h4>
                                 <p className='list-group-item-text'>
                                     <span>{`${moment.unix(slot.startAt).format('YYYY/MM/DD(ddd) HH:mm:ss')} ~ ${moment.unix(slot.startAt + slot.duration).format('HH:mm:ss')}`}</span>
