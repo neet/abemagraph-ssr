@@ -38,7 +38,7 @@ class Current extends React.Component<ReduxProps<{
         const { mounted } = this.state;
         const now = Date.now() / 1000;
         return (
-            <div>
+            <React.Fragment>
                 <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
                 <PageHeader text='現在放送中の番組'>
                     <div className='pull-right'>
@@ -50,7 +50,7 @@ class Current extends React.Component<ReduxProps<{
                         </select>
                     </div>
                 </PageHeader>
-                {this.props.slots.length > 0 ? <div>
+                {this.props.slots.length > 0 ? <React.Fragment>
                     <dl className='dl-horizontal'>
                         <dt>総閲覧数 <Glyphicon glyph='user' /></dt>
                         <dd>{slots.reduce((total, item) => total += item.stats ? item.stats.view : 0, 0)}</dd>
@@ -65,7 +65,7 @@ class Current extends React.Component<ReduxProps<{
                                     <span className='pull-right label label-success'>{this.findChannelName(slot.channelId)}</span>
                                 </h4>
                                 <p className='list-group-item-text'>
-                                    <span>{`${moment.unix(slot.startAt).format('YYYY/MM/DD(ddd) HH:mm:ss')} ~ ${moment.unix(slot.startAt + slot.duration).format('HH:mm:ss')}`}</span>
+                                    {`${moment.unix(slot.startAt).format('YYYY/MM/DD(ddd) HH:mm:ss')} ~ ${moment.unix(slot.startAt + slot.duration).format('HH:mm:ss')}`}
                                     <br />
                                     {slot.stats ? (
                                         `閲覧数:${slot.stats.view} (${mounted ? (slot.stats.view / (now - slot.startAt) * 60).toFixed(2) : '-'} vpm) ` +
@@ -75,8 +75,8 @@ class Current extends React.Component<ReduxProps<{
                             </Link>
                         ))}
                     </div>
-                </div> : null}
-            </div>
+                </React.Fragment> : null}
+            </React.Fragment>
         );
     }
 }

@@ -10,7 +10,7 @@ import { NotFound } from './routes/NotFound';
 export class Routes extends React.Component {
     render() {
         return (
-            <div>
+            <React.Fragment>
                 <Header />
                 <Container>
                     <Switch>
@@ -19,7 +19,7 @@ export class Routes extends React.Component {
                     </Switch>
                     <Footer />
                 </Container>
-            </div>
+            </React.Fragment>
         );
     }
 }
