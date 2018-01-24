@@ -6,13 +6,17 @@ import { Container } from '../components/Container';
 import { PageHeader } from '../components/PageHeader';
 import { ReduxProps, connect } from '../utils/connect';
 import { BroadcastSlot } from '../../types/abemagraph';
-import { Link } from 'react-router-dom';
+import { Link, withRouter, RouteComponentProps } from 'react-router-dom';
 import { Title } from '../components/RouterControl';
 import { Glyphicon } from '../components/Glyphicon';
 import { Channel } from '../../types/abema';
 
 
-class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elapsedFromUpdate: number, channels: Channel[] }>, { mounted: boolean }>{
+class Current extends React.Component<ReduxProps<{
+    slots: BroadcastSlot[],
+    elapsedFromUpdate: number,
+    channels: Channel[]
+}> & RouteComponentProps<{}>, { mounted: boolean }>{
     constructor(props) {
         super(props);
         this.state = { mounted: false };
@@ -27,27 +31,27 @@ class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elaps
     }
 
     render() {
-        if (this.props.slots.length > 0) {
-            const { slots } = this.props;
-            const { mounted } = this.state;
-            const findChannelName = (channelId: string) => {
-                const channel = this.props.channels.find(ch => ch.id === channelId);
-                return channel ? channel.name : channelId;
-            };
-            const now = Date.now() / 1000;
-            return (
-                <div>
-                    <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
-                    <PageHeader text='現在放送中の番組'>
-                        <div className='pull-right'>
-                            <select className='form-control'>
-                                <option value='v'>閲覧数</option>
-                                <option value='c'>コメント数</option>
-                                <option value='vpm'>閲覧数の勢い</option>
-                                <option value='cpm'>コメントの勢い</option>
-                            </select>
-                        </div>
-                    </PageHeader>
+        const { slots } = this.props;
+        const { mounted } = this.state;
+        const findChannelName = (channelId: string) => {
+            const channel = this.props.channels.find(ch => ch.id === channelId);
+            return channel ? channel.name : channelId;
+        };
+        const now = Date.now() / 1000;
+        return (
+            <div>
+                <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
+                <PageHeader text='現在放送中の番組'>
+                    <div className='pull-right'>
+                        <select className='form-control'>
+                            <option value='v'>閲覧数</option>
+                            <option value='c'>コメント数</option>
+                            <option value='vpm'>閲覧数の勢い</option>
+                            <option value='cpm'>コメントの勢い</option>
+                        </select>
+                    </div>
+                </PageHeader>
+                {this.props.slots.length > 0 ? <div>
                     <dl className='dl-horizontal'>
                         <dt>総閲覧数 <Glyphicon glyph='user' /></dt>
                         <dd>{slots.reduce((total, item) => total += item.stats ? item.stats.view : 0, 0)}</dd>
@@ -72,10 +76,9 @@ class Current extends React.Component<ReduxProps<{ slots: BroadcastSlot[], elaps
                             </Link>
                         ))}
                     </div>
-                </div >
-            );
-        }
-        return null;
+                </div> : null}
+            </div>
+        );
     }
 }
 
