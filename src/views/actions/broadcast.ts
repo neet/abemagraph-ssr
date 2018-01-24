@@ -8,7 +8,6 @@ import { BroadcastSlot } from '../../types/abemagraph';
 import { TAction } from '../utils/connect';
 
 export const fetchBroadcastSlots = () => async (dispatch: Dispatch<Action>) => {
-    dispatch(setBroadcastSlots([]));
     const response = await fetch('/api/broadcast');
     const responseJson: BroadcastSlot[] = await response.json();
     dispatch(setBroadcastSlots(responseJson));

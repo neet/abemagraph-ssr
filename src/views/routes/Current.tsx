@@ -16,7 +16,7 @@ import { parse } from '../utils/querystring';
 type Sort = 'v' | 'c' | 'vpm' | 'cpm';
 class Current extends React.Component<ReduxProps<{
     slots: BroadcastSlot[],
-    elapsedFromUpdate: number,
+    broadcastSlotUpdated: number,
     channels: Channel[]
 }> & RouteComponentProps<{}>, { mounted: boolean, sortBy: Sort }>{
     constructor(props) {
@@ -27,7 +27,7 @@ class Current extends React.Component<ReduxProps<{
     componentDidMount() {
         if (this.props.slots.length > 0 && this.props.channels.length > 0 && this.props.channels.length !== this.props.slots.length)
             this.props.actions.app.fetchChannels();
-        if (this.props.elapsedFromUpdate > 60 * 1000)
+        if (Date.now() - this.props.broadcastSlotUpdated > 60 * 1000)
             this.props.actions.broadcast.fetchBroadcastSlots();
         this.setState({ mounted: true });
         this.setSortBy();
@@ -35,7 +35,7 @@ class Current extends React.Component<ReduxProps<{
 
     componentDidUpdate(prevProps: RouteComponentProps<{}>) {
         if (prevProps.location.search !== this.props.location.search) {
-            this.setSortBy();
+            this.componentDidMount();
         }
     }
 
@@ -119,8 +119,8 @@ class Current extends React.Component<ReduxProps<{
     }
 }
 
-export default connect<{ slots: BroadcastSlot[], elapsedFromUpdate: number, channels: Channel[] }>({
+export default connect<{ slots: BroadcastSlot[], broadcastSlotUpdated: number, channels: Channel[] }>({
     slots: state => state.broadcast.broadcastSlots,
-    elapsedFromUpdate: state => Date.now() - state.broadcast.broadcastSlotUpdated,
+    broadcastSlotUpdated: state => state.broadcast.broadcastSlotUpdated,
     channels: state => state.app.channels
 })(pure(Current));
