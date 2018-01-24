@@ -51,6 +51,11 @@ class Current extends React.Component<ReduxProps<{
         const channel = this.props.channels.find(ch => ch.id === channelId);
         return channel ? channel.name : channelId;
     }
+    private setSortUrl(e: React.ChangeEvent<HTMLSelectElement>) {
+        const sort = e.target.value || 'vpm';
+        if (['v', 'c', 'vpm', 'cpm'].indexOf(sort) >= 0)
+            this.props.history.replace(`?sort=${sort}`);
+    }
     render() {
         const now = Date.now() / 1000;
         const { mounted, sortBy } = this.state;
@@ -74,7 +79,7 @@ class Current extends React.Component<ReduxProps<{
                 <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
                 <PageHeader text='現在放送中の番組'>
                     <div className='pull-right'>
-                        <select className='form-control'>
+                        <select className='form-control' onChange={e => this.setSortUrl(e)} value={sortBy}>
                             <option value='v'>閲覧数</option>
                             <option value='c'>コメント数</option>
                             <option value='vpm'>閲覧数の勢い</option>
