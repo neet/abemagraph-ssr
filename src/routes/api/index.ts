@@ -48,12 +48,22 @@ export const broadcastChannels = (req: Request): Channel[] => {
         return [];
 };
 
+export const getChannels = async (req: Request): Promise<Channel[]> => {
+    const collector = req.app.get('collector') as Collector;
+    const cursor = await collector.channelsDb.find();
+    return await cursor.toArray();
+};
+
 router.get('/broadcast', async (req, res, next) => {
     res.json(await broadcast(req)).end();
 });
 
 router.get('/broadcast/channels', async (req, res, next) => {
     res.json(broadcastChannels(req)).end();
+});
+
+router.get('/channels', async (req, res, next) => {
+    res.json(await getChannels(req)).end();
 });
 
 export default router;
