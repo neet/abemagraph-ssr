@@ -13,7 +13,7 @@ import { Channel } from '../../types/abema';
 import { Mark } from '../components/Mark';
 import { parse } from '../utils/querystring';
 
-type Sort = 'v' | 'c' | 'vpm' | 'cpm';
+type Sort = 'v' | 'c' | 'vpm' | 'cpm' | 'ch';
 class Current extends React.Component<ReduxProps<{
     slots: BroadcastSlot[],
     broadcastSlotUpdated: number,
@@ -24,36 +24,42 @@ class Current extends React.Component<ReduxProps<{
         this.state = { mounted: false, sortBy: 'vpm' };
     }
 
+    componentWillMount() {
+        this.setSortBy();
+    }
     componentDidMount() {
         if (this.props.slots.length > 0 && this.props.channels.length > 0 && this.props.channels.length !== this.props.slots.length)
             this.props.actions.app.fetchChannels();
         if (Date.now() - this.props.broadcastSlotUpdated > 60 * 1000)
             this.props.actions.broadcast.fetchBroadcastSlots();
         this.setState({ mounted: true });
-        this.setSortBy();
     }
 
     componentDidUpdate(prevProps: RouteComponentProps<{}>) {
         if (prevProps.location.search !== this.props.location.search) {
             this.componentDidMount();
+            this.setSortBy();
         }
     }
 
     private setSortBy() {
         if (this.props.location.search) {
             const search: { sort?: Sort } = parse(this.props.location.search);
-            if (search.sort && this.state.sortBy !== search.sort && ['v', 'c', 'vpm', 'cpm'].indexOf(search.sort) >= 0) {
+            if (search.sort && this.state.sortBy !== search.sort && ['v', 'c', 'vpm', 'cpm', 'ch'].indexOf(search.sort) >= 0) {
                 this.setState({ sortBy: search.sort });
             }
         }
     }
     private findChannelName(channelId: string) {
-        const channel = this.props.channels.find(ch => ch.id === channelId);
+        const channel = this.findChannel(channelId);
         return channel ? channel.name : channelId;
+    }
+    private findChannel(channelId: string) {
+        return this.props.channels.find(ch => ch.id === channelId);
     }
     private setSortUrl(e: React.ChangeEvent<HTMLSelectElement>) {
         const sort = e.target.value || 'vpm';
-        if (['v', 'c', 'vpm', 'cpm'].indexOf(sort) >= 0)
+        if (['v', 'c', 'vpm', 'cpm', 'ch'].indexOf(sort) >= 0)
             this.props.history.replace(`?sort=${sort}`);
     }
     render() {
@@ -71,8 +77,16 @@ class Current extends React.Component<ReduxProps<{
                 return b.stats.comment - a.stats.comment;
             else if (sortBy === 'cpm')
                 return b.cpm - a.cpm;
-            else
+            else if (sortBy === 'vpm')
                 return b.vpm - a.vpm;
+            else {
+                const ach = this.findChannel(a.channelId);
+                const bch = this.findChannel(b.channelId);
+                if (ach && bch)
+                    return ach.order - bch.order;
+                else
+                    return a.channelId.localeCompare(b.channelId);
+            }
         });
         return (
             <React.Fragment>
@@ -80,6 +94,7 @@ class Current extends React.Component<ReduxProps<{
                 <PageHeader text='現在放送中の番組'>
                     <div className='pull-right'>
                         <select className='form-control' onChange={e => this.setSortUrl(e)} value={sortBy}>
+                            <option value='ch'>チャンネル順</option>
                             <option value='v'>閲覧数</option>
                             <option value='c'>コメント数</option>
                             <option value='vpm'>閲覧数の勢い</option>
