@@ -1,20 +1,18 @@
-import { Dispatch } from 'react-redux';
 import { createAction } from 'redux-actions';
-import { Action } from 'redux';
 
-import { Slot } from '../../types/abema';
-import { SET_BROADCAST_SLOTS } from '../constant/actions';
-import { BroadcastSlot } from '../../types/abemagraph';
 import { TAction } from '../utils/connect';
+import { Dispatch } from 'react-redux';
+import { Action } from 'redux';
+import { Channel } from '../../types/abema';
+import { SET_CHANNELS } from '../constant/actions';
 
-export const fetchBroadcastSlots = () => async (dispatch: Dispatch<Action>) => {
-    dispatch(setBroadcastSlots([]));
-    const response = await fetch('/api/broadcast');
-    const responseJson: BroadcastSlot[] = await response.json();
-    dispatch(setBroadcastSlots(responseJson));
+export const fetchChannels = () => async (dispatch: Dispatch<Action>) => {
+    const response = await fetch('/api/broadcast/channels');
+    const responseJson: Channel[] = await response.json();
+    dispatch(setChannels(responseJson));
 };
 
-export const setBroadcastSlots = createAction<BroadcastSlot[]>(SET_BROADCAST_SLOTS);
-export type ISetBroadcastSlots = TAction<typeof SET_BROADCAST_SLOTS, BroadcastSlot[]>;
+export const setChannels = createAction<Channel[]>(SET_CHANNELS);
+type ISetChannels = TAction<typeof SET_CHANNELS, Channel[]>;
 
-export type Actions = ISetBroadcastSlots;
+export type Actions = ISetChannels;

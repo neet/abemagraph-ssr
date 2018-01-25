@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 export const Footer = () => (
-    <div>
+    <React.Fragment>
         <hr />
         <span className='center'>Powered by AbemaGraph</span>
-    </div>);
+    </React.Fragment>);

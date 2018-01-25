@@ -1,1 +1,2 @@
 export const SET_BROADCAST_SLOTS = 'SET_BROADCAST_SLOTS';
+export const SET_CHANNELS = 'SET_CHANNELS';

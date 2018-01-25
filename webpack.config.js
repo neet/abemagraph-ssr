@@ -5,9 +5,9 @@ const ExtractTestPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
     entry: {
-        vendor: ['babel-polyfill', 'react', 'react-dom', 'react-bootstrap',
-            'jquery', 'redux', 'react-redux', 'recompose', 'moment', 'bootstrap', 'react-router-dom',
-            'redux-actions', 'lodash-es', 'react-router-bootstrap'],
+        vendor: ['babel-polyfill', 'react', 'react-dom', 'react-router-dom',
+            'jquery', 'redux', 'react-redux', 'recompose', 'moment', 'bootstrap',
+            'redux-actions', 'lodash-es', 'tslib'],
         app: ['./src/views/index.tsx']
     },
     output: {
@@ -58,7 +58,6 @@ module.exports = {
         ]
     },
     plugins: [
-        new ExtractTestPlugin('app.css'),
         new webpack.NamedModulesPlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
         new webpack.LoaderOptionsPlugin({
@@ -66,8 +65,13 @@ module.exports = {
                 use: poststylus(['autoprefixer'])
             }
         }),
+        new ExtractTestPlugin('app.css'),
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendor',
+            minChunks: Infinity
+        }),
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'manifest',
             minChunks: Infinity,
         }),
         new webpack.ProvidePlugin({
