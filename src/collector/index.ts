@@ -11,9 +11,10 @@ import { Slot, Program, Channel, Timetable } from '../types/abema';
 import { getSlotAudience } from './audience';
 import { Log, All } from '../types/abemagraph';
 import { sleep } from '../utils/sleep';
+import { purgeId } from '../utils/purge-id';
 
 export class Collector {
-    slotsDb: Collection;
+    slotsDb: Collection<Slot & { programs: string[] }>;
     programsDb: Collection<Program>;
     logsDb: Collection<Log>;
     channelsDb: Collection<Channel>;
@@ -123,13 +124,24 @@ export class Collector {
 
     async getChannel(...names: string[]): Promise<Channel[]> {
         const cursor = await this.channelsDb.find({ $or: names.map(name => ({ _id: name })) });
-        return await cursor.toArray();
+        return (await cursor.toArray()).map(purgeId);
     }
-    
+
     async findLogs(...slotIds: string[]): Promise<{ [slot: string]: Log }> {
         const cursor = await this.logsDb.find({ $or: slotIds.map(_id => ({ _id })) });
         const result = await cursor.toArray();
         return result.reduce((list: { [slot: string]: Log }, item) => ({ ...list, [item._id]: item }), {});
+    }
+
+    async findSlot(...slotIds: string[]): Promise<Slot[]> {
+        const slotCursor = await this.slotsDb.find({ $or: slotIds.map(slotId => ({ _id: slotId })) });
+        const slots = (await slotCursor.toArray()).map(purgeId);
+        const prorgamsCursor = await this.programsDb.find({ $or: _.flatMap(slots, slot => slot.programs).map(pgId => ({ _id: pgId })) });
+        const programs = (await prorgamsCursor.toArray()).map(purgeId);
+        return slots.map(slot => ({
+            ...slot,
+            programs: slot.programs.map((pgId: string) => programs.find(pg => pg.id === pgId)).filter((pg: Program): pg is Program => !!pg)
+        }));
     }
 
     startSchedule() {

@@ -3,7 +3,7 @@ import { Collector } from '../../collector';
 
 import * as _ from 'lodash';
 import { Stats, BroadcastSlot } from '../../types/abemagraph';
-import { Channel } from '../../types/abema';
+import { Channel, Slot } from '../../types/abema';
 
 const router = Router();
 
@@ -51,7 +51,13 @@ export const broadcastChannels = (req: Request): Channel[] => {
 export const getChannels = async (req: Request): Promise<Channel[]> => {
     const collector = req.app.get('collector') as Collector;
     const cursor = await collector.channelsDb.find();
-    return await cursor.toArray();
+    return (await cursor.toArray()).map(channel => ({ id: channel.id, name: channel.name.replace(/チャンネル$/, '') }));
+};
+
+export const getSlot = async (req: Request, slotId: string): Promise<Slot | null> => {
+    const collector = req.app.get('collector') as Collector;
+    const slots = await collector.findSlot(slotId);
+    return slots.length === 1 ? slots[0] : null;
 };
 
 router.get('/broadcast', async (req, res, next) => {
@@ -64,6 +70,14 @@ router.get('/broadcast/channels', async (req, res, next) => {
 
 router.get('/channels', async (req, res, next) => {
     res.json(await getChannels(req)).end();
+});
+
+router.get('/slots/:slotId', async (req, res, next) => {
+    const slot = await getSlot(req, req.params.slotId);
+    if (slot)
+        res.json(slot).end();
+    else
+        res.status(404).end('404 not found');
 });
 
 export default router;
