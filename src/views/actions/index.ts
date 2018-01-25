@@ -1,8 +1,6 @@
-import * as broadcast from './broadcast';
 import * as app from './app';
 
 export default {
-    app,
-    broadcast
+    app
 };
-export type Actions = broadcast.Actions | app.Actions;
+export type Actions = app.Actions;
