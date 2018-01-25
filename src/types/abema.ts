@@ -70,6 +70,7 @@ interface SlotGroup {
 export interface Channel {
     id: string;
     name: string;
+    order: number;
 }
 
 export interface Slot {

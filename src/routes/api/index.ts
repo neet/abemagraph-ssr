@@ -43,7 +43,7 @@ export const broadcastChannels = (req: Request): Channel[] => {
     const collector = req.app.get('collector') as Collector;
     const channels = collector.channels;
     if (channels)
-        return channels.map(channel => ({ id: channel.id, name: channel.name.replace(/チャンネル$/, '') })) || [];
+        return channels.map(channel => ({ id: channel.id, name: channel.name.replace(/チャンネル$/, ''), order: channel.order })) || [];
     else
         return [];
 };
@@ -51,7 +51,7 @@ export const broadcastChannels = (req: Request): Channel[] => {
 export const getChannels = async (req: Request): Promise<Channel[]> => {
     const collector = req.app.get('collector') as Collector;
     const cursor = await collector.channelsDb.find();
-    return (await cursor.toArray()).map(channel => ({ id: channel.id, name: channel.name.replace(/チャンネル$/, '') }));
+    return (await cursor.toArray()).map(channel => ({ id: channel.id, name: channel.name.replace(/チャンネル$/, ''), order: channel.order }));
 };
 
 export const getSlot = async (req: Request, slotId: string): Promise<Slot | null> => {
