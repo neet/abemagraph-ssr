@@ -136,6 +136,7 @@ export class Collector {
     async findSlot(...slotIds: string[]): Promise<Slot[]> {
         const slotCursor = await this.slotsDb.find({ $or: slotIds.map(slotId => ({ _id: slotId })) });
         const slots = (await slotCursor.toArray()).map(purgeId);
+        if (slots.length === 0) return [];
         const prorgamsCursor = await this.programsDb.find({ $or: _.flatMap(slots, slot => slot.programs).map(pgId => ({ _id: pgId })) });
         const programs = (await prorgamsCursor.toArray()).map(purgeId);
         return slots.map(slot => ({
