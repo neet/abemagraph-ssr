@@ -31,7 +31,7 @@ class Current extends React.Component<ReduxProps<{
         if (this.props.slots.length > 0 && this.props.channels.length > 0 && this.props.channels.length !== this.props.slots.length)
             this.props.actions.app.fetchChannels();
         if (Date.now() - this.props.broadcastSlotUpdated > 60 * 1000)
-            this.props.actions.app.fetchBroadcastSlots();
+            this.props.actions.broadcast.fetchBroadcastSlots();
         this.setState({ mounted: true });
     }
 
@@ -135,7 +135,7 @@ class Current extends React.Component<ReduxProps<{
 }
 
 export default connect<{ slots: BroadcastSlot[], broadcastSlotUpdated: number, channels: Channel[] }>({
-    slots: state => state.app.broadcastSlots,
-    broadcastSlotUpdated: state => state.app.broadcastSlotUpdated,
+    slots: state => state.broadcast.broadcastSlots,
+    broadcastSlotUpdated: state => state.broadcast.broadcastSlotUpdated,
     channels: state => state.app.channels
 })(pure(Current));

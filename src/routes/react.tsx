@@ -13,9 +13,11 @@ export const renderSSR = async (req: Request, res: Response) => {
     res.contentType('text/html');
 
     const store = createStore(reducers, {
-        app: {
+        broadcast: {
             broadcastSlots: await broadcast(req),
-            broadcastSlotUpdated: Date.now(),
+            broadcastSlotUpdated: Date.now()
+        },
+        app: {
             channels: broadcastChannels(req)
         }
     });
