@@ -11,6 +11,7 @@ import { Mark } from '../components/Mark';
 import { Glyphicon } from '../components/Glyphicon';
 import * as _ from 'lodash';
 import { Loader } from '../components/Loader';
+import { EpisodeItem } from '../components/Episode';
 
 class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channel }> & RouteComponentProps<{ slotId: string }>, { now: number }> {
     constructor(props) {
@@ -105,6 +106,7 @@ class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channe
                             `プレミアム - ${moment.unix(slot.timeshiftEndAt).format('MM/DD(ddd) HH:mm')}まで` : 'なし'}</dd>
                 </dl>
                 <pre>{slot.content}</pre>
+                {slot.programs.map(pg => <EpisodeItem key={pg.id} program={pg} />)}
                 <div className='row'>
                     <div className='col-sm-4'>
                         <dl>
