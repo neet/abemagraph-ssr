@@ -13,4 +13,4 @@ export const EpisodeItem = ({ program }: { program: Program }) => (
                     <small>ID: {program.id}</small>)}</span>
         </div>
     </div>
-)
+);
