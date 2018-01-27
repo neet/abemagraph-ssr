@@ -9,7 +9,8 @@ import { Slot, Channel } from '../../types/abema';
 import { PageHeader } from '../components/PageHeader';
 import { Mark } from '../components/Mark';
 import { Glyphicon } from '../components/Glyphicon';
-import * as _ from 'lodash-es';
+import * as _ from 'lodash';
+import { Loader } from '../components/Loader';
 
 class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channel }> & RouteComponentProps<{ slotId: string }>, { now: number }> {
     constructor(props) {
@@ -124,7 +125,7 @@ class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channe
                 </>
             );
         }
-        return null;
+        return <Loader />;
     }
 }
 
