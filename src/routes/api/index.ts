@@ -48,7 +48,7 @@ export const broadcastChannels = (req: Request): Channel[] => {
         return [];
 };
 
-export const getChannels = async (req: Request): Promise<Channel[]> => {
+export const channels = async (req: Request): Promise<Channel[]> => {
     const collector = req.app.get('collector') as Collector;
     const cursor = await collector.channelsDb.find();
     return (await cursor.toArray()).map(channel => ({ id: channel.id, name: channel.name.replace(/チャンネル$/, ''), order: channel.order }));
@@ -69,7 +69,7 @@ router.get('/broadcast/channels', async (req, res, next) => {
 });
 
 router.get('/channels', async (req, res, next) => {
-    res.json(await getChannels(req)).end();
+    res.json(await channels(req)).end();
 });
 
 router.get('/slots/:slotId', async (req, res, next) => {
