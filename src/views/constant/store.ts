@@ -8,7 +8,7 @@ export interface StoreBroadcast {
 
 export interface StoreApp {
     channels: Channel[];
-    slot: Slot | null;
+    slot?: Slot;
 }
 
 
