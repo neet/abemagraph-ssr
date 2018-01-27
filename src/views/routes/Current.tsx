@@ -89,7 +89,7 @@ class Current extends React.Component<ReduxProps<{
             }
         });
         return (
-            <React.Fragment>
+            <>
                 <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
                 <PageHeader text='現在放送中の番組'>
                     <div className='pull-right'>
@@ -102,7 +102,7 @@ class Current extends React.Component<ReduxProps<{
                         </select>
                     </div>
                 </PageHeader>
-                {this.props.slots.length > 0 ? <React.Fragment>
+                {this.props.slots.length > 0 ? <>
                     <dl className='dl-horizontal'>
                         <dt>総閲覧数 <Glyphicon glyph='user' /></dt>
                         <dd>{slots.reduce((total, item) => total += item.stats ? item.stats.view : 0, 0)}</dd>
@@ -128,8 +128,8 @@ class Current extends React.Component<ReduxProps<{
                             </Link>
                         ))}
                     </div>
-                </React.Fragment> : null}
-            </React.Fragment>
+                </> : null}
+            </>
         );
     }
 }
