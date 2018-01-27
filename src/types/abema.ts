@@ -31,6 +31,7 @@ interface Episode {
     sequence: number;
     title?: string;
     overview?: string;
+    name?: string;
 }
 
 interface ProvidedInfo {
