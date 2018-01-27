@@ -85,6 +85,7 @@ export interface Slot {
     links?: {};
     content: string;
     timeshiftEndAt: number;
+    timeshiftFreeEndAt: number;
     programs: Program[];
     slotGroup?: SlotGroup;
     displayProgramId: string;
