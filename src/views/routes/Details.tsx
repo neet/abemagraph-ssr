@@ -85,7 +85,7 @@ class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channe
                     <dd>
                         {`${moment.unix(slot.startAt).format('YYYY/MM/DD(ddd) HH:mm:ss')} ~ ${moment.unix(slot.endAt).format('HH:mm:ss')} ` +
                             `(${Math.floor((slot.endAt - slot.startAt) / 60)}分` +
-                            (isEnd ? ' / 終了' : isOnAir ? `開始から約${((now - slot.startAt) / 60).toFixed(1)}分` : '') + ')'}
+                            (isEnd ? ' / 終了' : isOnAir ? ` / 開始から約${((now - slot.startAt) / 60).toFixed(1)}分` : '') + ')'}
                     </dd>
                     <dt><Glyphicon glyph='link' /> 公式ページ</dt>
                     <dd><a href={officialLink}>{officialLink}</a></dd>
