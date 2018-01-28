@@ -29,8 +29,8 @@ const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Re
         fetchInitialState: async (state: Store, req: Request, match: match<{ slotId: string }>) => {
             return _.merge(state, {
                 broadcast: {
-                    broadcastSlots: await broadcast(req),
-                    broadcastSlotUpdated: Date.now()
+                    slots: await broadcast(req),
+                    updated: Date.now()
                 }
             });
         }

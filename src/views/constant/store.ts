@@ -2,8 +2,10 @@ import { BroadcastSlot } from '../../types/abemagraph';
 import { Channel, Slot } from '../../types/abema';
 
 export interface StoreBroadcast {
-    broadcastSlots: BroadcastSlot[];
-    broadcastSlotUpdated: number;
+    slots: BroadcastSlot[];
+    updated: number;
+    isFetching: boolean;
+    isFailed: boolean;
 }
 
 export interface StoreApp {
