@@ -1,6 +1,5 @@
 import { StoreBroadcast } from '../constant/store';
 import { Actions } from '../actions/index';
-import { RECEIVE_BROADCAST_SLOTS, REQUEST_BROADCAST_SLOTS, FAILED_FETCH_BROADCAST_SLOTS } from '../constant/actions';
 
 const initialState: StoreBroadcast = {
     slots: [],
@@ -10,12 +9,12 @@ const initialState: StoreBroadcast = {
 };
 export const broadcast = (state: StoreBroadcast = initialState, action: Actions) => {
     switch (action.type) {
-        case RECEIVE_BROADCAST_SLOTS:
+        case 'FETCH_RECEIVED_BROADCAST_SLOT':
             return { ...state, slots: action.payload, updated: Date.now(), isFetching: false, isFailed: false };
-        case REQUEST_BROADCAST_SLOTS:
+        case 'FETCH_REQUEST_BROADCAST_SLOT':
             return { ...state, isFetching: true };
-        case FAILED_FETCH_BROADCAST_SLOTS:
-            return { ...state, isFetching: false, isFailed: true };
+        case 'FETCH_FAILED_BROADCAST_SLOT':
+            return { ...state, isFetching: false, isFailed: true, slots: [] };
         default:
             return state;
     }

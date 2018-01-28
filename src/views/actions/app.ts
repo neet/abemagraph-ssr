@@ -4,7 +4,7 @@ import { TAction } from '../utils/connect';
 import { Dispatch } from 'react-redux';
 import { Action } from 'redux';
 import { Channel, Slot } from '../../types/abema';
-import { SET_CHANNELS, SET_SLOT, UNSET_SLOT } from '../constant/actions';
+import { SET_CHANNELS } from '../constant/actions';
 
 export const fetchChannels = () => async (dispatch: Dispatch<Action>) => {
     const response = await fetch('/api/broadcast/channels');
@@ -12,19 +12,7 @@ export const fetchChannels = () => async (dispatch: Dispatch<Action>) => {
     dispatch(setChannels(responseJson));
 };
 
-export const fetchSlot = (slotId: string) => async (dispatch: Dispatch<Action>) => {
-    const response = await fetch(`/api/slots/${slotId}`);
-    const responseJson: Slot = await response.json();
-    dispatch(setSlot(responseJson));
-};
-
 export const setChannels = createAction<Channel[]>(SET_CHANNELS);
 type ISetChannels = TAction<typeof SET_CHANNELS, Channel[]>;
 
-export const setSlot = createAction<Slot>(SET_SLOT);
-type ISetSlot = TAction<typeof SET_SLOT, Slot>;
-
-export const unsetSlot = createAction(UNSET_SLOT);
-type IUnsetSlot = TAction<typeof UNSET_SLOT, void>;
-
-export type Actions = ISetChannels | ISetSlot | IUnsetSlot;
+export type Actions = ISetChannels;

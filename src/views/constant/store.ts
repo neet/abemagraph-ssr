@@ -10,11 +10,15 @@ export interface StoreBroadcast {
 
 export interface StoreApp {
     channels: Channel[];
-    slot?: Slot;
 }
 
+export interface StoreSlot {
+    slot?: Slot;
+    isFailed: boolean;
+}
 
 export interface Store {
     app: StoreApp;
     broadcast: StoreBroadcast;
+    slot: StoreSlot;
 }

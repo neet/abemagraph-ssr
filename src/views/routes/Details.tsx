@@ -12,8 +12,9 @@ import { Glyphicon } from '../components/Glyphicon';
 import * as _ from 'lodash';
 import { Loader } from '../components/Loader';
 import { EpisodeItem } from '../components/Episode';
+import { ErrorPage } from '../components/Error';
 
-class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channel }> & RouteComponentProps<{ slotId: string }>, { now: number }> {
+class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channel, isFailed: boolean }> & RouteComponentProps<{ slotId: string }>, { now: number }> {
     constructor(props) {
         super(props);
         this.state = { now: 0 };
@@ -24,7 +25,7 @@ class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channe
             this.props.actions.app.fetchChannels();
         }
         if ((!slot && match.params.slotId) || (slot && match.params.slotId !== slot.id)) {
-            this.props.actions.app.fetchSlot(match.params.slotId);
+            this.props.actions.slot.fetchSlot(match.params.slotId);
         }
         this.setState({ now: Date.now() / 1000 });
     }
@@ -34,11 +35,12 @@ class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channe
         }
     }
     componentWillUnmount() {
-        this.props.actions.app.unsetSlot();
+        this.props.actions.slot.invalidateSlot();
     }
     render() {
         const { slot, channel } = this.props;
         const { now } = this.state;
+        if(this.props.isFailed) return <ErrorPage />;
         if (slot && channel) {
             const isEnd = slot.endAt < this.state.now;
             const isOnAir = this.state.now > slot.startAt && this.state.now < slot.endAt;
@@ -131,7 +133,8 @@ class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channe
     }
 }
 
-export default connect<{ slot?: Slot, channel?: Channel }>({
-    slot: state => state.app.slot,
-    channel: ({ app: { slot, channels } }) => slot ? channels.find(ch => ch.id === slot.channelId) : undefined
+export default connect<{ slot?: Slot, channel?: Channel, isFailed: boolean }>({
+    slot: state => state.slot.slot,
+    channel: ({ app: { channels }, slot: { slot } }) => slot ? channels.find(ch => ch.id === slot.channelId) : undefined,
+    isFailed: state => state.slot.isFailed
 })(pure(Details));

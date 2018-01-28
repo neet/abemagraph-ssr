@@ -14,7 +14,8 @@ import 'jquery';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './app.styl';
-import { compose } from 'redux';
+import { compose, Middleware } from 'redux';
+import { fetchMiddleware } from './utils/fetch-middleware';
 
 let initialState = {};
 if (window['__INITIAL_STATE__']) {
@@ -22,7 +23,7 @@ if (window['__INITIAL_STATE__']) {
     delete window['__INITIAL_STATE__'];
 }
 const composeEnhancers = window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
-const store = createStore(reducers, initialState, composeEnhancers(applyMiddleware(thunk)));
+const store = createStore(reducers, initialState, composeEnhancers(applyMiddleware(fetchMiddleware as Middleware, thunk)));
 
 hydrate((
     <Provider store={store}>
