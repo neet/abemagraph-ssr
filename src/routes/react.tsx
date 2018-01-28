@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { StaticRouter, RouteProps, match, matchPath } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
+import * as _ from 'lodash';
 
 import { Routes } from '../views/Routes';
 import reducers from '../views/reducers';
@@ -15,26 +16,23 @@ const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Re
         path: '/details/:slotId',
         exact: true,
         fetchInitialState: async (state: Store, req: Request, match: match<{ slotId: string }>) => {
-            return {
-                ...state,
+            return _.merge(state, {
                 app: {
-                    ...state.app,
                     slot: await getSlot(req, match.params.slotId) || undefined
                 }
-            };
+            });
         }
     },
     {
         path: '/',
         exact: true,
         fetchInitialState: async (state: Store, req: Request, match: match<{ slotId: string }>) => {
-            return {
-                ...state,
+            return _.merge(state, {
                 broadcast: {
                     broadcastSlots: await broadcast(req),
                     broadcastSlotUpdated: Date.now()
                 }
-            };
+            });
         }
     }
 ];
