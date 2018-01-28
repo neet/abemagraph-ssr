@@ -102,8 +102,8 @@ class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channe
                     <dt><Glyphicon glyph='time' /> タイムシフト</dt>
                     <dd>{slot.flags.timeshift ?
                         slot.flags.timeshiftFree && slot.timeshiftFreeEndAt > now ?
-                            `無料 - ${moment.unix(slot.timeshiftFreeEndAt || slot.timeshiftEndAt).format('MM/DD(ddd) HH:mm')}まで` :
-                            `プレミアム - ${moment.unix(slot.timeshiftEndAt).format('MM/DD(ddd) HH:mm')}まで` : 'なし'}</dd>
+                            (now > 0 ? `無料 - ${moment.unix(slot.timeshiftFreeEndAt || slot.timeshiftEndAt).format('MM/DD(ddd) HH:mm')}まで` : '無料') :
+                            (now > 0 ? `プレミアム - ${moment.unix(slot.timeshiftEndAt).format('MM/DD(ddd) HH:mm')}まで` : 'プレミアム') : 'なし'}</dd>
                 </dl>
                 <pre>{slot.content}</pre>
                 {slot.programs.map(pg => <EpisodeItem key={pg.id} program={pg} />)}
