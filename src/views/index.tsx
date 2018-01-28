@@ -14,13 +14,15 @@ import 'jquery';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './app.styl';
+import { compose } from 'redux';
 
 let initialState = {};
 if (window['__INITIAL_STATE__']) {
     initialState = window['__INITIAL_STATE__'];
     delete window['__INITIAL_STATE__'];
 }
-const store = createStore(reducers, initialState, applyMiddleware(thunk));
+const composeEnhancers = window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
+const store = createStore(reducers, initialState, composeEnhancers(applyMiddleware(thunk)));
 
 hydrate((
     <Provider store={store}>
