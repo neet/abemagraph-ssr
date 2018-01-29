@@ -40,13 +40,16 @@ class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channe
     render() {
         const { slot, channel } = this.props;
         const { now } = this.state;
-        if(this.props.isFailed) return <ErrorPage />;
+        if (this.props.isFailed) return <ErrorPage />;
         if (slot && channel) {
             const isEnd = slot.endAt < this.state.now;
             const isOnAir = this.state.now > slot.startAt && this.state.now < slot.endAt;
             const officialLink = `https://abema.tv/channels/${slot.channelId}/slots/${slot.id}`;
             const mark = [...Object.keys(slot.mark), ...Object.keys(slot.flags)];
             const series = slot.programs[0] && slot.programs[0].series && slot.programs[0].series.id;
+            const casts = _.uniq(_.flatMap(slot.programs, p => p.credit.casts || []));
+            const crews = _.uniq(_.flatMap(slot.programs, p => p.credit.crews || []));
+            const copyrights = _.uniq(_.flatMap(slot.programs, p => p.credit.copyrights || []));
             return (
                 <>
                 <PageHeader text={(
@@ -110,22 +113,22 @@ class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channe
                 <pre>{slot.content}</pre>
                 {slot.programs.map(pg => <EpisodeItem key={pg.id} program={pg} />)}
                 <div className='row'>
-                    <div className='col-sm-4'>
+                    {casts.length > 0 ? <div className='col-sm-4'>
                         <dl>
                             <dt>キャスト</dt>
-                            {_.uniq(_.flatMap(slot.programs, p => p.credit.casts || [])).map(n => <dd key={n}>{n}</dd>)}
+                            {casts.map(n => <dd key={n}>{n}</dd>)}
                         </dl>
-                    </div>
-                    <div className='col-sm-4'>
+                    </div> : null}
+                    {crews.length > 0 ? <div className='col-sm-4'>
                         <dl>
                             <dt>スタッフ</dt>
-                            {_.uniq(_.flatMap(slot.programs, p => p.credit.crews || [])).map(n => <dd key={n}>{n}</dd>)}
+                            {crews.map(n => <dd key={n}>{n}</dd>)}
                         </dl>
-                    </div>
+                    </div> : null}
                 </div>
                 <hr />
                 <hr />
-                {_.uniq(_.flatMap(slot.programs, p => p.credit.copyrights || [])).map(n => <span className='center' key={n}>{n}</span>)}
+                {copyrights.length > 0 ? copyrights.map(n => <span className='center' key={n}>{n}</span>) : null}
                 </>
             );
         }
