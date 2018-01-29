@@ -1,6 +1,4 @@
-import { Dispatch } from 'react-redux';
 import { createAction } from 'redux-actions';
-import { Action } from 'redux';
 
 import { Slot } from '../../types/abema';
 import { TAction } from '../utils/connect';

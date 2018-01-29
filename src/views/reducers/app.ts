@@ -1,13 +1,12 @@
 import { StoreApp } from '../constant/store';
 import { Actions } from '../actions/index';
-import { SET_CHANNELS, SET_SLOT, INVALIDATE_SLOT } from '../constant/actions';
 
 const initialState: StoreApp = {
     channels: []
 };
 export const app = (state: StoreApp = initialState, action: Actions): StoreApp => {
     switch (action.type) {
-        case SET_CHANNELS:
+        case 'FETCH_RECEIVED_CHANNELS':
             return { ...state, channels: action.payload };
         default:
             return state;

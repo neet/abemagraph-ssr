@@ -1,18 +1,9 @@
-import { createAction } from 'redux-actions';
-
 import { TAction } from '../utils/connect';
-import { Dispatch } from 'react-redux';
-import { Action } from 'redux';
-import { Channel, Slot } from '../../types/abema';
-import { SET_CHANNELS } from '../constant/actions';
+import { Channel } from '../../types/abema';
+import { fetchAction } from '../utils/fetch-middleware';
 
-export const fetchChannels = () => async (dispatch: Dispatch<Action>) => {
-    const response = await fetch('/api/broadcast/channels');
-    const responseJson: Channel[] = await response.json();
-    dispatch(setChannels(responseJson));
-};
+export const fetchChannels = () => fetchAction('/api/broadcast/channels', 'CHANNELS');
 
-export const setChannels = createAction<Channel[]>(SET_CHANNELS);
-type ISetChannels = TAction<typeof SET_CHANNELS, Channel[]>;
+type IFetchedChannels = TAction<'FETCH_RECEIVED_CHANNELS', Channel[]>;
 
-export type Actions = ISetChannels;
+export type Actions = IFetchedChannels;
