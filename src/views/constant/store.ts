@@ -14,7 +14,9 @@ export interface StoreApp {
 
 export interface StoreSlot {
     slot?: Slot;
-    isFailed: boolean;
+    logs?: number[][];
+    isSlotFailed: boolean;
+    isLogsFailed: boolean;
 }
 
 export interface Store {

@@ -11,7 +11,13 @@ export type IReceiveSlot = TAction<'FETCH_RECEIVED_SLOT', Slot>;
 export type IRequestSlot = TAction<'FETCH_REQUEST_SLOT', void>;
 export type IFailedFetchSlot = TAction<'FETCH_FAILED_SLOT', void>;
 
+export const fetchSlotLogs = (slotId: string) => fetchAction(`/api/logs/${slotId}`, 'SLOT_LOGS');
+
+export type IReceiveSlotLogs = TAction<'FETCH_RECEIVED_SLOT_LOGS', number[][]>;
+export type IRequestSlotLogs = TAction<'FETCH_REQUEST_SLOT_LOGS', void>;
+export type IFailedFetchSlotLogs = TAction<'FETCH_FAILED_SLOT_LOGS', void>;
+
 export const invalidateSlot = createAction(INVALIDATE_SLOT);
 type IInvalidateSlot = TAction<typeof INVALIDATE_SLOT, void>;
 
-export type Actions = IReceiveSlot | IRequestSlot | IFailedFetchSlot | IInvalidateSlot;
+export type Actions = IReceiveSlot | IRequestSlot | IFailedFetchSlot | IInvalidateSlot | IReceiveSlotLogs | IRequestSlotLogs | IFailedFetchSlotLogs;
