@@ -14,34 +14,46 @@ import { Loader } from '../components/Loader';
 import { EpisodeItem } from '../components/Episode';
 import { ErrorPage } from '../components/Error';
 
-class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channel, isFailed: boolean }> & RouteComponentProps<{ slotId: string }>, { now: number }> {
+type Logs = { [time: number]: { view: number, comment: number } };
+class Details extends React.Component<ReduxProps<{
+    slot?: Slot, channel?: Channel, isSlotFailed: boolean, isLogsFailed: boolean, logs?: Logs, logsUpdated: number
+}> & RouteComponentProps<{ slotId: string }>, { now: number }> {
     constructor(props) {
         super(props);
         this.state = { now: 0 };
     }
     componentDidMount() {
-        const { slot, channel, match } = this.props;
+        const { slot, channel, match: { params: { slotId } } } = this.props;
+        const now = Date.now() / 1000;
         if (slot && !channel) {
             this.props.actions.app.fetchChannels();
         }
-        if ((!slot && match.params.slotId) || (slot && match.params.slotId !== slot.id)) {
-            this.props.actions.slot.fetchSlot(match.params.slotId);
+        if ((!slot && slotId) || (slot && slotId !== slot.id)) {
+            this.props.actions.slot.fetchSlot(slotId);
         }
-        this.setState({ now: Date.now() / 1000 });
+        if (slot && slot.startAt < now) {
+            this.props.actions.slot.fetchSlotLogs(slot.id); // SSRで来た時はこっち
+        }
+        this.setState({ now });
     }
-    componentWillReceiveProps(nextProps: ReduxProps<{ slot?: Slot, channel?: Channel }> & RouteComponentProps<{ slotId: string }>) {
-        if (this.props.match.params.slotId !== nextProps.match.params.slotId) {
+    componentWillReceiveProps({ match: { params: { slotId } }, slot }: RouteComponentProps<{ slotId: string }> & { slot?: Slot }) {
+        if (this.props.match.params.slotId !== slotId) {
             this.componentDidMount();
+        }
+        if (this.props.slot !== slot && slot && slot.startAt < Date.now() / 1000) {
+            this.props.actions.slot.fetchSlotLogs(slot.id); // 普通にRouter
         }
     }
     componentWillUnmount() {
         this.props.actions.slot.invalidateSlot();
     }
     render() {
-        const { slot, channel } = this.props;
+        const { slot, channel, logs, logsUpdated: updated } = this.props;
         const { now } = this.state;
-        if (this.props.isFailed) return <ErrorPage />;
+        const now2 = Date.now() / 1000;
+        if (this.props.isSlotFailed) return <ErrorPage />;
         if (slot && channel) {
+            const elapsedSec = this.state.now - slot.startAt;
             const isEnd = slot.endAt < this.state.now;
             const isOnAir = this.state.now > slot.startAt && this.state.now < slot.endAt;
             const officialLink = `https://abema.tv/channels/${slot.channelId}/slots/${slot.id}`;
@@ -90,7 +102,7 @@ class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channe
                     <dd>
                         {`${moment.unix(slot.startAt).format('YYYY/MM/DD(ddd) HH:mm:ss')} ~ ${moment.unix(slot.endAt).format('HH:mm:ss')} ` +
                             `(${Math.floor((slot.endAt - slot.startAt) / 60)}分` +
-                            (isEnd ? ' / 終了' : isOnAir ? ` / 開始から約${((now - slot.startAt) / 60).toFixed(1)}分` : '') + ')'}
+                            (isEnd ? ' / 終了' : isOnAir ? ` / 開始から約${(elapsedSec / 60).toFixed(1)}分` : '') + ')'}
                     </dd>
                     <dt><Glyphicon glyph='link' /> 公式ページ</dt>
                     <dd><a href={officialLink}>{officialLink}</a></dd>
@@ -109,10 +121,18 @@ class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channe
                         slot.flags.timeshiftFree && slot.timeshiftFreeEndAt > now ?
                             (now > 0 ? `無料 - ${moment.unix(slot.timeshiftFreeEndAt || slot.timeshiftEndAt).format('MM/DD(ddd) HH:mm')}まで` : '無料') :
                             (now > 0 ? `プレミアム - ${moment.unix(slot.timeshiftEndAt).format('MM/DD(ddd) HH:mm')}まで` : 'プレミアム') : 'なし'}</dd>
+                    {slot.startAt < now2 ? <>
+                        <dt>総コメント数 <Glyphicon glyph='comment' /></dt>
+                        <dd>{logs ? (now > 0 ? `${logs[updated].comment} (${(logs[updated].comment / elapsedSec * 60).toFixed(2)} comments/min)` : logs[updated].comment) : '-'}</dd>
+                        <dt>総閲覧数 <Glyphicon glyph='user' /></dt>
+                        <dd>{logs ? (now > 0 ? `${logs[updated].view} (${(logs[updated].view / elapsedSec * 60).toFixed(2)} views/min)` : logs[updated].view) : '-'}</dd>
+                        <dt>ログ数 <Glyphicon glyph='stats' /></dt>
+                        <dd>{logs ? Object.keys(logs).length : '-'}</dd>
+                        </> : null}
                 </dl>
                 <pre>{slot.content}</pre>
                 {slot.programs.map(pg => <EpisodeItem key={pg.id} program={pg} />)}
-                <div className='row'>
+                < div className='row'>
                     {casts.length > 0 ? <div className='col-sm-4'>
                         <dl>
                             <dt>キャスト</dt>
@@ -136,8 +156,11 @@ class Details extends React.Component<ReduxProps<{ slot?: Slot, channel?: Channe
     }
 }
 
-export default connect<{ slot?: Slot, channel?: Channel, isFailed: boolean }>({
+export default connect<{ slot?: Slot, channel?: Channel, isSlotFailed: boolean, isLogsFailed: boolean, logs?: Logs, logsUpdated: number }>({
     slot: state => state.slot.slot,
     channel: ({ app: { channels }, slot: { slot } }) => slot ? channels.find(ch => ch.id === slot.channelId) : undefined,
-    isFailed: state => state.slot.isFailed
+    isSlotFailed: state => state.slot.isSlotFailed,
+    isLogsFailed: state => state.slot.isLogsFailed,
+    logs: ({ slot: { slot, logs } }) => logs && slot ? logs.reduce((obj, log) => ({ ...obj, [log[0] + slot.startAt]: { view: log[1], comment: log[2] } }), {}) : undefined,
+    logsUpdated: ({ slot: { slot, logs } }) => logs && slot ? logs[logs.length - 1][0] + slot.startAt : 0
 })(pure(Details));
