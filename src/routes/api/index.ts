@@ -60,6 +60,20 @@ export const getSlot = async (req: Request, slotId: string): Promise<Slot | null
     return slots.length === 1 ? slots[0] : null;
 };
 
+export const slotLog = async (req: Request, slotId: string): Promise<number[][] | null> => {
+    const collector = req.app.get('collector') as Collector;
+    const slots = await collector.findSlot(slotId);
+    if(slots.length !== 1) return null;
+    const log = await collector.logsDb.findOne({ _id: slotId });
+    if (log) {
+        const keys = Object.keys(log.log).map(k => Number(k)).sort();
+        if (keys.length === 0) return [];
+        return keys.map(ts => [ts - slots[0].startAt, log.log[ts.toString()].v, log.log[ts.toString()].c]);
+    } else {
+        return [];
+    }
+};
+
 router.get('/broadcast', async (req, res, next) => {
     res.json(await broadcast(req)).end();
 });
@@ -76,6 +90,14 @@ router.get('/slots/:slotId', async (req, res, next) => {
     const slot = await getSlot(req, req.params.slotId);
     if (slot)
         res.json(slot).end();
+    else
+        res.status(404).end('404 not found');
+});
+
+router.get('/logs/:slotId', async (req, res, next) => {
+    const log = await slotLog(req, req.params.slotId);
+    if (log)
+        res.json(log).end();
     else
         res.status(404).end('404 not found');
 });
