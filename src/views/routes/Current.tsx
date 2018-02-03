@@ -25,7 +25,7 @@ class Current extends React.Component<ReduxProps<{
 }> & RouteComponentProps<{}>, { mounted: boolean, sortBy: Sort }>{
     constructor(props) {
         super(props);
-        this.state = { mounted: false, sortBy: 'vpm' };
+        this.state = { mounted: false, sortBy: 'ch' };
     }
 
     componentWillMount() {
@@ -62,7 +62,7 @@ class Current extends React.Component<ReduxProps<{
         return this.props.channels.find(ch => ch.id === channelId);
     }
     private setSortUrl(e: React.ChangeEvent<HTMLSelectElement>) {
-        const sort = e.target.value || 'vpm';
+        const sort = e.target.value || 'ch';
         if (['v', 'c', 'vpm', 'cpm', 'ch'].indexOf(sort) >= 0)
             this.props.history.replace(`?sort=${sort}`);
     }
@@ -72,7 +72,7 @@ class Current extends React.Component<ReduxProps<{
 
         if (this.props.isFetching) return <Loader />;
         if (this.props.isFailed) return <ErrorPage />;
-        
+
         const slots = this.props.slots.map(slot => ({
             ...slot,
             stats: slot.stats || { view: 0, comment: 0, updated: now },

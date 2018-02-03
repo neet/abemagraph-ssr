@@ -6,7 +6,7 @@ const initialState: StoreSlot = {
     slot: undefined,
     isSlotFailed: false,
     isLogsFailed: false,
-    logs: []
+    logs: undefined
 };
 export const slot = (state: StoreSlot = initialState, action: Actions) => {
     switch (action.type) {

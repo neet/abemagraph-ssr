@@ -13,6 +13,7 @@ import * as _ from 'lodash';
 import { Loader } from '../components/Loader';
 import { EpisodeItem } from '../components/Episode';
 import { ErrorPage } from '../components/Error';
+import { Title, StatusCode } from '../components/RouterControl';
 
 type Logs = { [time: number]: { view: number, comment: number } };
 class Details extends React.Component<ReduxProps<{
@@ -51,7 +52,9 @@ class Details extends React.Component<ReduxProps<{
         const { slot, channel, logs, logsUpdated: updated } = this.props;
         const { now } = this.state;
         const now2 = Date.now() / 1000;
-        if (this.props.isSlotFailed) return <ErrorPage />;
+        if (this.props.isSlotFailed) {
+            return <><ErrorPage /><StatusCode code={404} /></>;
+        }
         if (slot && channel) {
             const elapsedSec = this.state.now - slot.startAt;
             const isEnd = slot.endAt < this.state.now;
@@ -70,6 +73,7 @@ class Details extends React.Component<ReduxProps<{
                     {`${slot.title} - 詳細情報`}
                     </>
                 )}>
+                    <Title title={`${slot.title} - AbemaGraph`} />
                     <div className='pull-right'>
                         {now > 0 && now > slot.startAt ? (
                             isOnAir ?
@@ -128,6 +132,8 @@ class Details extends React.Component<ReduxProps<{
                         <dd>{logs ? (now > 0 ? `${logs[updated].view} (${(logs[updated].view / elapsedSec * 60).toFixed(2)} views/min)` : logs[updated].view) : '-'}</dd>
                         <dt>ログ数 <Glyphicon glyph='stats' /></dt>
                         <dd>{logs ? Object.keys(logs).length : '-'}</dd>
+                        <dt>ログ最終更新</dt>
+                        <dd>{updated > 0 ? moment.unix(updated).format('YYYY/MM/DD(ddd) HH:mm:ss') : '-'}</dd>
                         </> : null}
                 </dl>
                 <pre>{slot.content}</pre>
@@ -161,6 +167,6 @@ export default connect<{ slot?: Slot, channel?: Channel, isSlotFailed: boolean, 
     channel: ({ app: { channels }, slot: { slot } }) => slot ? channels.find(ch => ch.id === slot.channelId) : undefined,
     isSlotFailed: state => state.slot.isSlotFailed,
     isLogsFailed: state => state.slot.isLogsFailed,
-    logs: ({ slot: { slot, logs } }) => logs && slot ? logs.reduce((obj, log) => ({ ...obj, [log[0] + slot.startAt]: { view: log[1], comment: log[2] } }), {}) : undefined,
-    logsUpdated: ({ slot: { slot, logs } }) => logs && slot ? logs[logs.length - 1][0] + slot.startAt : 0
+    logs: ({ slot: { slot, logs } }) => logs && slot && logs.length > 0 ? logs.reduce((obj, log) => ({ ...obj, [log[0] + slot.startAt]: { view: log[1], comment: log[2] } }), {}) : undefined,
+    logsUpdated: ({ slot: { slot, logs } }) => logs && slot && logs.length > 0 ? logs[logs.length - 1][0] + slot.startAt : 0
 })(pure(Details));
