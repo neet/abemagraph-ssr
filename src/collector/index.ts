@@ -158,11 +158,12 @@ export class Collector {
         };
         const collectStatsTask = async () => {
             while (this.cancel && this.cancelPromise) {
-                const nextTime = moment().startOf('minute').add(1, 'minute');
+                const nextTime = moment().startOf('minute').add(1, 'minute').subtract(250, 'ms');
                 await Promise.race([this.cancelPromise, sleep(nextTime.diff(moment(), 'ms'))]);
                 await this.collectSlotLog();
+                await Promise.race([this.cancelPromise, sleep(1000 * 30)]);
+                await this.collectSlotLog();
                 appLogger.debug('Collector', 'OK');
-                await Promise.race([this.cancelPromise, sleep(1000)]);
             }
         };
         this.promises = [timetableTask(), collectStatsTask()];
