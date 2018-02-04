@@ -12,21 +12,12 @@ const initialState: StoreAll = {
 export const all = (state: StoreAll = initialState, action: Actions): StoreAll => {
     switch (action.type) {
         case 'FETCH_RECEIVED_ALL':
-            const [offset, channels, data] = action.payload;
+            const [offset] = action.payload;
             return {
                 ...state,
                 date: moment.unix(offset).startOf('day'),
                 isAllFailed: false,
-                all: data.map(([time, comment, view, channel]) => ({
-                    time: time + offset,
-                    comment,
-                    view,
-                    channels: channel.reduce((obj, item, index) => {
-                        if (item !== 0)
-                            obj[channels[index]] = { comment: item[0], view: item[1] };
-                        return obj;
-                    }, {})
-                }))
+                all: action.payload
             };
         case 'FETCH_FAILED_ALL':
             return { ...state, isAllFailed: true, all: undefined };

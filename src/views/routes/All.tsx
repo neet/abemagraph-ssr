@@ -92,8 +92,21 @@ class All extends React.Component<ReduxProps<{
 }
 
 export default connect<{ date: moment.Moment, log?: AllLog, isFailed: boolean, channels: Channel[] }>({
-    date: state => state.all.date,
-    log: state => state.all.all,
+    date: state => typeof state.all.date === 'string' ? moment(state.all.date) : state.all.date,
+    log: state => {
+        if (!state.all.all) return undefined;
+        const [offset, channels, data] = state.all.all;
+        return data.map(([time, comment, view, channel]) => ({
+            time: time + offset,
+            comment,
+            view,
+            channels: channel.reduce((obj, item, index) => {
+                if (item !== 0)
+                    obj[channels[index]] = { comment: item[0], view: item[1] };
+                return obj;
+            }, {})
+        }));
+    },
     isFailed: state => state.all.isAllFailed,
     channels: state => state.app.channels
 })(pure(All));

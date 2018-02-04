@@ -5,10 +5,11 @@ import { StaticRouter, RouteProps, match, matchPath } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 
 import { Routes } from '../views/Routes';
 import reducers from '../views/reducers';
-import { broadcast, broadcastChannels, getSlot } from './api/index';
+import { broadcast, broadcastChannels, getSlot, allLog } from './api/index';
 import { Store } from '../views/constant/store';
 
 const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Request, match: match<{}>) => Promise<Store> }> = [
@@ -34,7 +35,21 @@ const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Re
                 }
             });
         }
-    }
+    },
+    {
+        path: '/all/:date?',
+        fetchInitialState: async (state: Store, req: Request, match: match<{ date?: string }>) => {
+            let date = moment(match.params.date, 'YYYYMMDD');
+            if(!date.isValid()) date = moment();
+            const all = await allLog(req, date.format('YYYYMMDD'));
+            return _.merge(state, {
+                all: {
+                    all,
+                    date
+                }
+            });
+        }
+    },
 ];
 
 export const renderSSR = async (req: Request, res: Response) => {
