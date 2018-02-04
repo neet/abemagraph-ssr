@@ -28,8 +28,4 @@ export interface BroadcastSlot {
     stats?: Stats;
 }
 
-export interface AllLogCompressed {
-    0: number; // offset
-    1: string[]; // channels
-    2: Array<[number, number, number, Array<[number, number] | 0>]>;
-}
+export type AllLogCompressed = [number, string[], Array<[number, number, number, Array<[number, number] | 0>]>];
