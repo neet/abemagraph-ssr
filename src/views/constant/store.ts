@@ -1,4 +1,4 @@
-import { BroadcastSlot } from '../../types/abemagraph';
+import { BroadcastSlot, AllLog } from '../../types/abemagraph';
 import { Channel, Slot } from '../../types/abema';
 import { Moment } from 'moment';
 
@@ -23,17 +23,7 @@ export interface StoreSlot {
 export interface StoreAll {
     isAllFailed: boolean;
     date: Moment;
-    all: Array<{
-        time: number,
-        view: number,
-        comment: number,
-        channels: {
-            [channel: string]: {
-                view: number,
-                comment: number
-            }
-        }
-    }> | undefined;
+    all: AllLog | undefined;
 }
 
 export interface Store {

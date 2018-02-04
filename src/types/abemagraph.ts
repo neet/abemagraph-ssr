@@ -29,3 +29,14 @@ export interface BroadcastSlot {
 }
 
 export type AllLogCompressed = [number, string[], Array<[number, number, number, Array<[number, number] | 0>]>];
+export type AllLog = Array<{
+    time: number,
+    view: number,
+    comment: number,
+    channels: {
+        [channel: string]: {
+            view: number,
+            comment: number
+        }
+    }
+}>;

@@ -9,7 +9,7 @@ const initialState: StoreAll = {
     isAllFailed: false,
     all: undefined
 };
-export const slot = (state: StoreAll = initialState, action: Actions): StoreAll => {
+export const all = (state: StoreAll = initialState, action: Actions): StoreAll => {
     switch (action.type) {
         case 'FETCH_RECEIVED_ALL':
             const [offset, channels, data] = action.payload;

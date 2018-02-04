@@ -3,5 +3,6 @@ import { broadcast } from './broadcast';
 import { Store } from '../constant/store';
 import { app } from './app';
 import { slot } from './slot';
+import { all } from './all';
 
-export default combineReducers<Store>({ app, broadcast, slot });
+export default combineReducers<Store>({ app, broadcast, slot, all });

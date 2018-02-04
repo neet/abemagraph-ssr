@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Route, Switch } from 'react-router-dom';
+import * as moment from 'moment';
 
 import { Header } from './components/Header';
 import Current from './routes/Current';
@@ -7,6 +8,8 @@ import { Footer } from './components/Footer';
 import { Container } from './components/Container';
 import { NotFound } from './routes/NotFound';
 import Details from './routes/Details';
+import All from './routes/All';
+import { Redirect } from 'react-router';
 
 export class Routes extends React.Component {
     render() {
@@ -17,6 +20,8 @@ export class Routes extends React.Component {
                     <Switch>
                         <Route path='/' exact component={Current} />
                         <Route path='/details/:slotId' exact component={Details} />
+                        <Route path='/all/:date' exact component={All} />
+                        <Route path='/all' exact component={All} />
                         <Route component={NotFound} />
                     </Switch>
                     <Footer />
