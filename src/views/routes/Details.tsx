@@ -14,6 +14,7 @@ import { Loader } from '../components/Loader';
 import { EpisodeItem } from '../components/Episode';
 import { ErrorPage } from '../components/Error';
 import { Title, StatusCode } from '../components/RouterControl';
+import { Highcharts } from '../components/Highcharts';
 
 type Logs = { [time: number]: { view: number, comment: number } };
 class Details extends React.Component<ReduxProps<{
@@ -47,6 +48,45 @@ class Details extends React.Component<ReduxProps<{
     }
     componentWillUnmount() {
         this.props.actions.slot.invalidateSlot();
+    }
+    private createGraphConfig(type: 'comment' | 'view', logs: Logs, startAt: number) {
+        const logsData = Object.keys(logs).map(v => [Number(v) * 1000, logs[v][type]]) as Array<[number, number]>;
+        const perMinLogs = logsData.map((v, i, a) => i === 0 ? (v[0] - startAt * 1000 > 30 * 1000 ? [v[0], Math.floor((v[1] || 0) / (v[0] - startAt * 1000) * 60 * 1000)] : [v[0], 0]) : [v[0], Math.floor((v[1] - a[i - 1][1]) / (a[i][0] - a[i - 1][0]) * 60 * 1000)]) as Array<[number, number]>;
+        const title = type === 'comment' ? 'コメント数' : '閲覧数';
+        return {
+            title: { text: title },
+            xAxis: {
+                title: {
+                    text: '時間',
+                },
+                type: 'datetime'
+            },
+            yAxis: [{
+                title: {
+                    text: title,
+                },
+                min: 0,
+            }, {
+                title: {
+                    text: title + '/min',
+                },
+                min: 0,
+                opposite: true
+            }],
+            series: type === 'comment' ? [{
+                name: title + '/min',
+                data: perMinLogs,
+                yAxis: 1
+            }] : [{
+                name: title,
+                data: logsData,
+                yAxis: 0
+            }, {
+                name: title + '/min',
+                data: perMinLogs,
+                yAxis: 1
+            }]
+        };
     }
     render() {
         const { slot, channel, logs, logsUpdated: updated } = this.props;
@@ -153,6 +193,13 @@ class Details extends React.Component<ReduxProps<{
                     </div> : null}
                 </div>
                 <hr />
+                {logs ? <>
+                    <PageHeader mini text={<><Glyphicon glyph='comment' /> コメントグラフ</>} />
+                    <Highcharts options={this.createGraphConfig('comment', logs, slot.startAt)} />
+                    <PageHeader mini text={<><Glyphicon glyph='user' /> 閲覧数グラフ</>} />
+                    <Highcharts options={this.createGraphConfig('view', logs, slot.startAt)} />
+                    </>
+                    : null}
                 <hr />
                 {copyrights.length > 0 ? copyrights.map(n => <span className='center' key={n}>{n}</span>) : null}
                 </>
