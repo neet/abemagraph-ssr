@@ -20,8 +20,7 @@ export class Routes extends React.Component {
                     <Switch>
                         <Route path='/' exact component={Current} />
                         <Route path='/details/:slotId' exact component={Details} />
-                        <Route path='/all/:date' exact component={All} />
-                        <Route path='/all' exact component={All} />
+                        <Route path='/all/:date?' component={All} />
                         <Route component={NotFound} />
                     </Switch>
                     <Footer />
