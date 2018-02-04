@@ -158,7 +158,7 @@ export class Collector {
         };
         const collectStatsTask = async () => {
             while (this.cancel && this.cancelPromise) {
-                const nextTime = moment().startOf('minute').add(1, 'minute').subtract(300, 'ms');
+                const nextTime = moment().startOf('minute').add(1, 'minute');
                 await Promise.race([this.cancelPromise, sleep(nextTime.diff(moment(), 'ms'))]);
                 await this.collectSlotLog();
                 appLogger.debug('Collector', 'OK');
