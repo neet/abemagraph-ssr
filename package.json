@@ -9,6 +9,7 @@
     "bootstrap": "3.3.7",
     "elasticsearch": "^14.0.0",
     "express": "^4.16.2",
+    "highcharts": "^6.0.5",
     "jquery": "^3.3.1",
     "js-yaml": "^3.10.0",
     "lodash": "^4.17.4",
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@types/elasticsearch": "^5.0.19",
     "@types/express": "^4.11.0",
+    "@types/highcharts": "^5.0.16",
     "@types/js-yaml": "^3.10.1",
     "@types/lodash": "^4.14.93",
     "@types/lodash-es": "^4.17.0",
