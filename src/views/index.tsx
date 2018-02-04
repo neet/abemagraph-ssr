@@ -26,12 +26,15 @@ if (window['__INITIAL_STATE__']) {
 const composeEnhancers = window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
 const store = createStore(reducers, initialState, composeEnhancers(applyMiddleware(fetchMiddleware as Middleware, thunk)));
 
+require('highcharts/modules/exporting')(Highstock);
+
 Highstock.setOptions({
     global: {
         useUTC: false
     },
     lang: {
-        numericSymbols: null
+        shortMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => n + '月'),
+        weekdays: '日月火水木金土'.split('').map(n => n + '曜日')
     },
     chart: {
         animation: false,
@@ -61,7 +64,11 @@ Highstock.setOptions({
             year: '(%Y)'
         }
     },
-    colors: ['#6fb900', '#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9', '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1']
+    colors: ['#6fb900', '#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9', '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'],
+    exporting: {
+        printMaxWidth: 0xffff,
+        fallbackToExportServer: false
+    }
 });
 
 hydrate((

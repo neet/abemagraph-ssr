@@ -49,7 +49,7 @@ class Details extends React.Component<ReduxProps<{
     componentWillUnmount() {
         this.props.actions.slot.invalidateSlot();
     }
-    private createGraphConfig(type: 'comment' | 'view', logs: Logs, startAt: number) {
+    private createGraphConfig(type: 'comment' | 'view', logs: Logs, { startAt, endAt }: { startAt: number, endAt: number }) {
         const logsData = Object.keys(logs).map(v => [Number(v) * 1000, logs[v][type]]) as Array<[number, number]>;
         const perMinLogs = logsData.map((v, i, a) => i === 0 ? (v[0] - startAt * 1000 > 30 * 1000 ? [v[0], Math.floor((v[1] || 0) / (v[0] - startAt * 1000) * 60 * 1000)] : [v[0], 0]) : [v[0], Math.floor((v[1] - a[i - 1][1]) / (a[i][0] - a[i - 1][0]) * 60 * 1000)]) as Array<[number, number]>;
         const title = type === 'comment' ? 'コメント数' : '閲覧数';
@@ -59,7 +59,9 @@ class Details extends React.Component<ReduxProps<{
                 title: {
                     text: '時間',
                 },
-                type: 'datetime'
+                type: 'datetime',
+                min: startAt * 1000,
+                max: endAt * 1000
             },
             yAxis: [{
                 title: {
@@ -195,9 +197,9 @@ class Details extends React.Component<ReduxProps<{
                 <hr />
                 {logs ? <>
                     <PageHeader mini text={<><Glyphicon glyph='comment' /> コメントグラフ</>} />
-                    <Highcharts options={this.createGraphConfig('comment', logs, slot.startAt)} />
+                    <Highcharts options={this.createGraphConfig('comment', logs, slot)} />
                     <PageHeader mini text={<><Glyphicon glyph='user' /> 閲覧数グラフ</>} />
-                    <Highcharts options={this.createGraphConfig('view', logs, slot.startAt)} />
+                    <Highcharts options={this.createGraphConfig('view', logs, slot)} />
                     </>
                     : null}
                 <hr />
