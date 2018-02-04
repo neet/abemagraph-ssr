@@ -7,7 +7,7 @@ const initialState: StoreBroadcast = {
     isFailed: false,
     isFetching: false
 };
-export const broadcast = (state: StoreBroadcast = initialState, action: Actions) => {
+export const broadcast = (state: StoreBroadcast = initialState, action: Actions): StoreBroadcast => {
     switch (action.type) {
         case 'FETCH_RECEIVED_BROADCAST_SLOT':
             return { ...state, slots: action.payload, updated: Date.now(), isFetching: false, isFailed: false };

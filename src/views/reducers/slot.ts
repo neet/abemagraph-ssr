@@ -8,7 +8,7 @@ const initialState: StoreSlot = {
     isLogsFailed: false,
     logs: undefined
 };
-export const slot = (state: StoreSlot = initialState, action: Actions) => {
+export const slot = (state: StoreSlot = initialState, action: Actions): StoreSlot => {
     switch (action.type) {
         case 'FETCH_RECEIVED_SLOT':
             return { ...state, slot: action.payload, isSlotFailed: false };

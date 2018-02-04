@@ -13,7 +13,7 @@ export type IFailedFetchSlot = TAction<'FETCH_FAILED_SLOT', void>;
 
 export const fetchSlotLogs = (slotId: string) => fetchAction(`/api/logs/${slotId}`, 'SLOT_LOGS');
 
-export type IReceiveSlotLogs = TAction<'FETCH_RECEIVED_SLOT_LOGS', number[][]>;
+export type IReceiveSlotLogs = TAction<'FETCH_RECEIVED_SLOT_LOGS', Array<[number, number, number]>>;
 export type IRequestSlotLogs = TAction<'FETCH_REQUEST_SLOT_LOGS', void>;
 export type IFailedFetchSlotLogs = TAction<'FETCH_FAILED_SLOT_LOGS', void>;
 
