@@ -8,9 +8,10 @@ interface ActionMap {
     [key: string]: Function | ActionMap;
 }
 
-export interface TAction<TType, TPayload> extends AnyAction {
+export interface TAction<TType, TPayload, TMeta = {}> extends AnyAction {
     type: TType;
     payload: TPayload;
+    meta: TMeta;
 }
 
 export interface ActionProps {

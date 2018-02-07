@@ -31,6 +31,7 @@ interface Episode {
     sequence: number;
     title?: string;
     overview?: string;
+    name?: string;
 }
 
 interface ProvidedInfo {
@@ -85,6 +86,7 @@ export interface Slot {
     links?: {};
     content: string;
     timeshiftEndAt: number;
+    timeshiftFreeEndAt: number;
     programs: Program[];
     slotGroup?: SlotGroup;
     displayProgramId: string;

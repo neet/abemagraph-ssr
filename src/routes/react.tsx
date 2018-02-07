@@ -1,26 +1,70 @@
 import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Request, Response } from 'express';
-import { StaticRouter } from 'react-router-dom';
+import { StaticRouter, RouteProps, match, matchPath } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
+import * as _ from 'lodash';
+import * as moment from 'moment';
 
 import { Routes } from '../views/Routes';
 import reducers from '../views/reducers';
-import { broadcast, broadcastChannels } from './api/index';
+import { broadcast, broadcastChannels, getSlot, allLog } from './api/index';
+import { Store } from '../views/constant/store';
+
+const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Request, match: match<{}>) => Promise<Store> }> = [
+    {
+        path: '/details/:slotId',
+        exact: true,
+        fetchInitialState: async (state: Store, req: Request, match: match<{ slotId: string }>) => {
+            return _.merge(state, {
+                slot: {
+                    slot: await getSlot(req, match.params.slotId) || undefined
+                }
+            });
+        }
+    },
+    {
+        path: '/',
+        exact: true,
+        fetchInitialState: async (state: Store, req: Request, match: match<{ slotId: string }>) => {
+            return _.merge(state, {
+                broadcast: {
+                    slots: await broadcast(req),
+                    updated: Date.now()
+                }
+            });
+        }
+    },
+    {
+        path: '/all/:date?',
+        fetchInitialState: async (state: Store, req: Request, match: match<{ date?: string }>) => {
+            let date = moment(match.params.date, 'YYYYMMDD');
+            if (!date.isValid()) date = moment();
+            const all = await allLog(req, date);
+            if (!all) return state;
+            return _.merge(state, {
+                all: {
+                    all,
+                    date
+                }
+            });
+        }
+    },
+];
 
 export const renderSSR = async (req: Request, res: Response) => {
     res.contentType('text/html');
 
-    const store = createStore(reducers, {
-        broadcast: {
-            broadcastSlots: await broadcast(req),
-            broadcastSlotUpdated: Date.now()
-        },
+    const initialState = await routeInfo.reduce((prom, route) => {
+        const m = matchPath(req.url, route);
+        return prom.then((state: Store) => m && route.fetchInitialState ? route.fetchInitialState(state, req, m) : Promise.resolve(state));
+    }, Promise.resolve({
         app: {
             channels: broadcastChannels(req)
         }
-    });
+    }));
+    const store = createStore(reducers, initialState);
     const context: { url?: string, status: number, title: string } = {
         status: 200,
         title: 'AbemaGraph'
@@ -32,6 +76,10 @@ export const renderSSR = async (req: Request, res: Response) => {
             </StaticRouter>
         </Provider>
     );
+    if (context.url) {
+        res.redirect(context.url);
+        return;
+    }
     const markup = `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -49,10 +97,6 @@ export const renderSSR = async (req: Request, res: Response) => {
 <script defer src="/assets/app.js"></script>
 </body>
 </html>`;
-    if (context.url) {
-        res.redirect(context.url);
-    } else {
-        res.status(context.status);
-        res.end(markup);
-    }
+    res.status(context.status);
+    res.end(markup);
 };

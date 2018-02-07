@@ -12,12 +12,16 @@ import { Glyphicon } from '../components/Glyphicon';
 import { Channel } from '../../types/abema';
 import { Mark } from '../components/Mark';
 import { parse } from '../utils/querystring';
+import { Loader } from '../components/Loader';
+import { ErrorPage } from '../components/Error';
 
 type Sort = 'v' | 'c' | 'vpm' | 'cpm' | 'ch';
 class Current extends React.Component<ReduxProps<{
     slots: BroadcastSlot[],
-    broadcastSlotUpdated: number,
-    channels: Channel[]
+    updated: number,
+    channels: Channel[],
+    isFetching: boolean,
+    isFailed: boolean
 }> & RouteComponentProps<{}>, { mounted: boolean, sortBy: Sort }>{
     constructor(props) {
         super(props);
@@ -30,7 +34,7 @@ class Current extends React.Component<ReduxProps<{
     componentDidMount() {
         if (this.props.slots.length > 0 && this.props.channels.length > 0 && this.props.channels.length !== this.props.slots.length)
             this.props.actions.app.fetchChannels();
-        if (Date.now() - this.props.broadcastSlotUpdated > 60 * 1000)
+        if (Date.now() - this.props.updated > 60 * 1000)
             this.props.actions.broadcast.fetchBroadcastSlots();
         this.setState({ mounted: true });
     }
@@ -65,6 +69,10 @@ class Current extends React.Component<ReduxProps<{
     render() {
         const now = Date.now() / 1000;
         const { mounted, sortBy } = this.state;
+
+        if (this.props.isFetching) return <Loader />;
+        if (this.props.isFailed) return <ErrorPage />;
+
         const slots = this.props.slots.map(slot => ({
             ...slot,
             stats: slot.stats || { view: 0, comment: 0, updated: now },
@@ -89,53 +97,53 @@ class Current extends React.Component<ReduxProps<{
             }
         });
         return (
-            <React.Fragment>
-                <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
-                <PageHeader text='現在放送中の番組'>
-                    <div className='pull-right'>
-                        <select className='form-control' onChange={e => this.setSortUrl(e)} value={sortBy}>
-                            <option value='ch'>チャンネル順</option>
-                            <option value='v'>閲覧数</option>
-                            <option value='c'>コメント数</option>
-                            <option value='vpm'>閲覧数の勢い</option>
-                            <option value='cpm'>コメントの勢い</option>
-                        </select>
-                    </div>
-                </PageHeader>
-                {this.props.slots.length > 0 ? <React.Fragment>
-                    <dl className='dl-horizontal'>
-                        <dt>総閲覧数 <Glyphicon glyph='user' /></dt>
-                        <dd>{slots.reduce((total, item) => total += item.stats ? item.stats.view : 0, 0)}</dd>
-                        <dt>総コメント数 <Glyphicon glyph='comment' /></dt>
-                        <dd>{slots.reduce((total, item) => total += item.stats ? item.stats.comment : 0, 0)}</dd>
-                    </dl>
-                    <div className='list-group'>
-                        {slots.map(slot => (
-                            <Link to={`/details/${slot.id}`} className='list-group-item' key={slot.id}>
-                                <h4 className='list-group-item-heading'>
-                                    <Mark mark={slot.mark} showItem={['first', 'last', 'live', 'newcomer', 'bingeWatching']} />
-                                    {slot.title}
-                                    <span className='pull-right label label-success'>{this.findChannelName(slot.channelId)}</span>
-                                </h4>
-                                <p className='list-group-item-text'>
-                                    {`${moment.unix(slot.startAt).format('YYYY/MM/DD(ddd) HH:mm:ss')} ~ ${moment.unix(slot.startAt + slot.duration).format('HH:mm:ss')}`}
-                                    <br />
-                                    {slot.stats ? (
-                                        `閲覧数:${slot.stats.view} (${mounted ? slot.vpm.toFixed(2) : '-'} vpm) ` +
-                                        `コメント:${slot.stats.comment} (${mounted ? slot.cpm.toFixed(2) : '-'} cpm)`
-                                    ) : '閲覧数: - (- vpm) コメント: - (- cpm)'}
-                                </p>
-                            </Link>
-                        ))}
-                    </div>
-                </React.Fragment> : null}
-            </React.Fragment>
+            <>
+            <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
+            <PageHeader text='現在放送中の番組'>
+                <div className='pull-right'>
+                    <select className='form-control' onChange={e => this.setSortUrl(e)} value={sortBy}>
+                        <option value='ch'>チャンネル順</option>
+                        <option value='v'>閲覧数</option>
+                        <option value='c'>コメント数</option>
+                        <option value='vpm'>閲覧数の勢い</option>
+                        <option value='cpm'>コメントの勢い</option>
+                    </select>
+                </div>
+            </PageHeader>
+            <dl className='dl-horizontal'>
+                <dt>総閲覧数 <Glyphicon glyph='user' /></dt>
+                <dd>{slots.reduce((total, item) => total += item.stats ? item.stats.view : 0, 0)}</dd>
+                <dt>総コメント数 <Glyphicon glyph='comment' /></dt>
+                <dd>{slots.reduce((total, item) => total += item.stats ? item.stats.comment : 0, 0)}</dd>
+            </dl>
+            <div className='list-group'>
+                {slots.map(slot => (
+                    <Link to={`/details/${slot.id}`} className='list-group-item' key={slot.id}>
+                        <h4 className='list-group-item-heading'>
+                            <Mark mark={slot.mark} showItem={['first', 'last', 'live', 'newcomer', 'bingeWatching']} />
+                            {slot.title}
+                            <span className='pull-right label label-success'>{this.findChannelName(slot.channelId)}</span>
+                        </h4>
+                        <p className='list-group-item-text'>
+                            {`${moment.unix(slot.startAt).format('YYYY/MM/DD(ddd) HH:mm:ss')} ~ ${moment.unix(slot.startAt + slot.duration).format('HH:mm:ss')}`}
+                            <br />
+                            {slot.stats ? (
+                                `閲覧数:${slot.stats.view} (${mounted ? slot.vpm.toFixed(2) : '-'} vpm) ` +
+                                `コメント:${slot.stats.comment} (${mounted ? slot.cpm.toFixed(2) : '-'} cpm)`
+                            ) : '閲覧数: - (- vpm) コメント: - (- cpm)'}
+                        </p>
+                    </Link>
+                ))}
+            </div>
+            </>
         );
     }
 }
 
-export default connect<{ slots: BroadcastSlot[], broadcastSlotUpdated: number, channels: Channel[] }>({
-    slots: state => state.broadcast.broadcastSlots,
-    broadcastSlotUpdated: state => state.broadcast.broadcastSlotUpdated,
-    channels: state => state.app.channels
+export default connect<{ slots: BroadcastSlot[], updated: number, channels: Channel[], isFetching: boolean, isFailed: boolean }>({
+    slots: state => state.broadcast.slots,
+    updated: state => state.broadcast.updated,
+    channels: state => state.app.channels,
+    isFailed: state => state.broadcast.isFailed,
+    isFetching: state => state.broadcast.isFetching
 })(pure(Current));

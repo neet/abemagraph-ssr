@@ -22,7 +22,6 @@ export const Header = () => (
                         <NavLink to='/all'><Glyphicon glyph='stats' /> 全体統計</NavLink>
                     </ul>
                     <ul className='nav navbar-nav navbar-right'>
-                        <NavLink to='/status'>ステータス</NavLink>
                         <li className='dropdown'>
                             <a href='#' className='dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
                                 <Glyphicon glyph='calendar' /> 番組表

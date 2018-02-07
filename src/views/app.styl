@@ -2,6 +2,9 @@ abema-color = #6fb900
 abema-color-light = rgba(111,185,0,.6)
 abema-color-light2 = rgba(111,185,0,.2)
 abema-color-light3 = rgba(111,185,0,.1)
+
+@import './loader.css'
+
 header
     height 50px
 .center
@@ -26,3 +29,102 @@ h3 > mark, dd > mark, .list-group-item-heading > mark, .slot mark
     text-decoration none
     margin-right 3px
     padding .5px
+pre
+    background-color rgba(255, 255, 255, 0) !important
+    border 0 !important
+    border-radius 0 !important
+    white-space pre-wrap
+    
+.episode, .slot 
+    position relative
+    width 280px
+    height 158px
+    border 1px solid rgba(111,185,0,.2)
+    border-radius 2px
+    box-sizing content-box
+    display inline-block
+    margin 20px
+    box-shadow 0 0 3px .5px rgba(111,185,0,.5)
+    overflow hidden
+
+.episode 
+    width 280px
+    height 158px
+
+.slot 
+    width 420px
+    height auto
+    max-width 100%
+    min-height 175px
+
+.slot img 
+    max-width 100%
+    height auto
+
+.episode > img 
+    object-fit contain
+    background #111
+
+.episode-body, .slot-body 
+    position absolute
+    bottom 0
+    background #fff
+    opacity .6
+    height 36px
+    width 100%
+    overflow hidden
+    transition all .3s ease-out
+    padding 4px 8px
+    display block
+    box-shadow 0 -.5px 3px 1px rgba(0,0,0,.5)
+
+.episode-body 
+    height 36px
+
+.slot-body 
+    height 48px
+
+.episode-body h4, .slot-body h4, .slot-body h6 
+    margin 0
+    overflow hidden
+    white-space nowrap
+    text-overflow ellipsis
+
+.slot-body h4 
+    line-height 24px
+    font-size 16px
+    font-weight bold
+
+.slot-body h6 
+    line-height 12px
+
+.episode-body h4 
+    line-height 24px
+
+.episode:hover > .episode-body, .slot:hover > .slot-body 
+    opacity 1
+    overflow-y auto
+
+.episode:hover > .episode-body 
+    height 80%
+
+.slot:hover > .slot-body 
+    height 60%
+
+.episode:hover > .episode-body h4, .slot:hover > .slot-body h4 
+    white-space normal
+
+.episode-body > span, .slot-body > span 
+    display none
+    opacity 0
+    transition all .1s ease-out
+
+.episode:hover > .episode-body > span, .slot:hover > .slot-body > span 
+    display block
+    opacity 1
+
+.episode-body > span img 
+    margin 0 0 2px 2px
+
+.loader-bg
+    height 80px

@@ -7,7 +7,7 @@ module.exports = {
     entry: {
         vendor: ['babel-polyfill', 'react', 'react-dom', 'react-router-dom',
             'jquery', 'redux', 'react-redux', 'recompose', 'moment', 'bootstrap',
-            'redux-actions', 'lodash-es', 'tslib'],
+            'redux-actions', 'lodash-es', 'tslib', 'highcharts/highstock'],
         app: ['./src/views/index.tsx']
     },
     output: {
@@ -75,11 +75,12 @@ module.exports = {
             minChunks: Infinity,
         }),
         new webpack.ProvidePlugin({
-            $: "jquery",
-            jQuery: "jquery"
+            $: 'jquery',
+            jQuery: 'jquery'
         })
     ],
     resolve: {
-        extensions: ['.ts', '.tsx', '.js', '.jsx']
+        extensions: ['.ts', '.tsx', '.js', '.jsx'],
+        alias: { 'lodash': 'lodash-es' }
     }
 };

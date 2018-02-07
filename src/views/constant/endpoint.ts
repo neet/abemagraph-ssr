@@ -1,0 +1,1 @@
+export const PROGRAM_IMAGE_ENDPOINT = '//images.abemagraph.info/pg/';
