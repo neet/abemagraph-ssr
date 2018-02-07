@@ -14,6 +14,7 @@ import 'jquery';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './app.styl';
+import 'react-datetime/css/react-datetime.css';
 import { compose, Middleware } from 'redux';
 import { fetchMiddleware } from './utils/fetch-middleware';
 import * as Highstock from 'highcharts/highstock';

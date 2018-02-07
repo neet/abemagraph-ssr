@@ -12,7 +12,7 @@ import { Channel } from '../../types/abema';
 import { Loader } from '../components/Loader';
 import { ErrorPage } from '../components/Error';
 import { Highcharts, Highstock } from '../components/Highcharts';
-import DatePicker from 'react-datepicker';
+import * as Datetime from 'react-datetime';
 
 type Props = ReduxProps<{
     date: moment.Moment,
@@ -119,12 +119,18 @@ class All extends React.Component<Props, { isMounted: boolean }>{
         if (!this.props.log) return <Loader />;
         const { date, log } = this.props;
         const dateStr = date.format('YYYY/MM/DD');
+        const today = moment().endOf('day');
         return (
             <>
             <Title title={`${dateStr}の全体統計情報 - AbemaGraph`} />
             <PageHeader text={`${dateStr}の全体統計情報`}>
                 <div className='pull-right'>
-                    {this.state.isMounted ? <DatePicker dateFormat='YYYY/MM/DD' onChange={() => 0} selected={date} /> : null}
+                    {this.state.isMounted ? <Datetime
+                        dateFormat='YYYY/MM/DD'
+                        timeFormat={false}
+                        isValidDate={current => current.isBefore(today)}
+                        defaultValue={date}
+                        onChange={nextDate => this.props.history.push(`/all/${(nextDate as moment.Moment).format('YYYYMMDD')}`)} /> : null}
                 </div>
             </PageHeader>
             <PageHeader mini text={<><Glyphicon glyph='comment' /> コメントの増加</>} />
