@@ -40,8 +40,9 @@ const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Re
         path: '/all/:date?',
         fetchInitialState: async (state: Store, req: Request, match: match<{ date?: string }>) => {
             let date = moment(match.params.date, 'YYYYMMDD');
-            if(!date.isValid()) date = moment();
-            const all = await allLog(req, date.format('YYYYMMDD'));
+            if (!date.isValid()) date = moment();
+            const all = await allLog(req, date);
+            if (!all) return state;
             return _.merge(state, {
                 all: {
                     all,
@@ -75,6 +76,10 @@ export const renderSSR = async (req: Request, res: Response) => {
             </StaticRouter>
         </Provider>
     );
+    if (context.url) {
+        res.redirect(context.url);
+        return;
+    }
     const markup = `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -92,10 +97,6 @@ export const renderSSR = async (req: Request, res: Response) => {
 <script defer src="/assets/app.js"></script>
 </body>
 </html>`;
-    if (context.url) {
-        res.redirect(context.url);
-    } else {
-        res.status(context.status);
-        res.end(markup);
-    }
+    res.status(context.status);
+    res.end(markup);
 };
