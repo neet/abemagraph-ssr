@@ -27,6 +27,7 @@ const composeEnhancers = window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compo
 const store = createStore(reducers, initialState, composeEnhancers(applyMiddleware(fetchMiddleware as Middleware, thunk)));
 
 require('highcharts/modules/exporting')(Highstock);
+require('highcharts/modules/offline-exporting')(Highstock);
 
 Highstock.setOptions({
     global: {
@@ -53,6 +54,17 @@ Highstock.setOptions({
     legend: {
         enabled: false
     },
+    tooltip: {
+        dateTimeLabelFormats: {
+            second: '%H:%M:%S',
+            minute: '%H:%M',
+            hour: '%m/%e %H:%M',
+            day: '%y/%m/%e',
+            week: '%y/%m/%e',
+            month: '%Y/%m',
+            year: '(%Y)'
+        }
+    },
     xAxis: {
         dateTimeLabelFormats: {
             second: '%H:%M:%S',
@@ -67,7 +79,9 @@ Highstock.setOptions({
     colors: ['#6fb900', '#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9', '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'],
     exporting: {
         printMaxWidth: 0xffff,
-        fallbackToExportServer: false
+        fallbackToExportServer: false,
+        sourceWidth: 2000,
+        sourceHeight: 1000
     }
 });
 
