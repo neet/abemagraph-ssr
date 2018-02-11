@@ -39,8 +39,12 @@ export class Collector {
         appLogger.debug('Saved timetable file');
 
         const slots = this.slots;
-        await this.channelsDb.insertMany(this.timetable.channels.map(channel => ({ ...channel, _id: channel.id }))).catch(() => undefined);
-        await this.programsDb.insertMany(_.uniqBy(_.flatMap(slots, s => s.programs), p => p.id).map(program => ({ ...program, _id: program.id }))).catch(() => undefined);
+        await this.channelsDb.insertMany(this.timetable.channels.map(channel => ({ ...channel, _id: channel.id })), { ordered: false }).catch(err => {
+            appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors.length);
+        });
+        await this.programsDb.insertMany(_.uniqBy(_.flatMap(slots, s => s.programs), p => p.id).map(program => ({ ...program, _id: program.id })), { ordered: false }).catch(err => {
+            appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors.length);
+        });
         await this.slotsDb.bulkWrite(slots.map(slot => ({
             replaceOne: {
                 filter: { _id: slot.id },
