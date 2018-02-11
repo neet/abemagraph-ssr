@@ -16,12 +16,12 @@ export interface StoreApp {
 export interface StoreSlot {
     slot?: Slot;
     logs?: Array<[number, number, number]>;
-    isSlotFailed: boolean;
-    isLogsFailed: boolean;
+    slotStatus: false | number;
+    logsStatus: false | number;
 }
 
 export interface StoreAll {
-    isAllFailed: boolean;
+    allStatus: false | number;
     date: Moment;
     all: AllLogCompressed | undefined;
 }

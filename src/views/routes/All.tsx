@@ -19,7 +19,8 @@ type Props = ReduxProps<{
     log?: AllLog,
     isFailed: boolean,
     channels: Channel[],
-    logChannels: string[]
+    logChannels: string[],
+    failedCode: number
 }> & RouteComponentProps<{ date: string }>;
 class All extends React.Component<Props, { isMounted: boolean }>{
     constructor(props) {
@@ -115,38 +116,38 @@ class All extends React.Component<Props, { isMounted: boolean }>{
         };
     }
     render() {
-        if (this.props.isFailed) return <ErrorPage />;
+        if (this.props.isFailed) return <ErrorPage code={this.props.failedCode} />;
         if (!this.props.log) return <Loader />;
         const { date, log } = this.props;
         const dateStr = date.format('YYYY/MM/DD');
         const today = moment().endOf('day');
         return (
             <>
-            <Title title={`${dateStr}の全体統計情報 - AbemaGraph`} />
-            <PageHeader text={`${dateStr}の全体統計情報`}>
-                <div className='pull-right'>
-                    {this.state.isMounted ? <Datetime
-                        dateFormat='YYYY/MM/DD'
-                        timeFormat={false}
-                        isValidDate={current => current.isBefore(today)}
-                        defaultValue={date}
-                        onChange={nextDate => this.props.history.push(`/all/${(nextDate as moment.Moment).format('YYYYMMDD')}`)} /> : null}
-                </div>
-            </PageHeader>
-            <PageHeader mini text={<><Glyphicon glyph='comment' /> コメントの増加</>} />
-            <Highcharts options={this.createAllGraph('comment')} />
-            <PageHeader mini text={<><Glyphicon glyph='user' /> 閲覧数の増加</>} />
-            <Highcharts options={this.createAllGraph('view')} />
-            <PageHeader mini text={<><Glyphicon glyph='comment' /> コメント/ch</>} />
-            <Highstock options={this.createChannelGraph('comment')} />
-            <PageHeader mini text={<><Glyphicon glyph='user' /> 閲覧数/ch</>} />
-            <Highstock options={this.createChannelGraph('view')} />
+                <Title title={`${dateStr}の全体統計情報 - AbemaGraph`} />
+                <PageHeader text={`${dateStr}の全体統計情報`}>
+                    <div className='pull-right'>
+                        {this.state.isMounted ? <Datetime
+                            dateFormat='YYYY/MM/DD'
+                            timeFormat={false}
+                            isValidDate={current => current.isBefore(today)}
+                            defaultValue={date}
+                            onChange={nextDate => this.props.history.push(`/all/${(nextDate as moment.Moment).format('YYYYMMDD')}`)} /> : null}
+                    </div>
+                </PageHeader>
+                <PageHeader mini text={<><Glyphicon glyph='comment' /> コメントの増加</>} />
+                <Highcharts options={this.createAllGraph('comment')} />
+                <PageHeader mini text={<><Glyphicon glyph='user' /> 閲覧数の増加</>} />
+                <Highcharts options={this.createAllGraph('view')} />
+                <PageHeader mini text={<><Glyphicon glyph='comment' /> コメント/ch</>} />
+                <Highstock options={this.createChannelGraph('comment')} />
+                <PageHeader mini text={<><Glyphicon glyph='user' /> 閲覧数/ch</>} />
+                <Highstock options={this.createChannelGraph('view')} />
             </>
         );
     }
 }
 
-export default connect<{ date: moment.Moment, log?: AllLog, isFailed: boolean, channels: Channel[], logChannels: string[] }>({
+export default connect<{ date: moment.Moment, log?: AllLog, isFailed: boolean, failedCode: number, channels: Channel[], logChannels: string[] }>({
     date: state => typeof state.all.date === 'string' ? moment(state.all.date) : state.all.date,
     log: state => {
         if (!state.all.all) return undefined;
@@ -162,7 +163,8 @@ export default connect<{ date: moment.Moment, log?: AllLog, isFailed: boolean, c
             }, {})
         }));
     },
-    isFailed: state => state.all.isAllFailed,
+    isFailed: state => !!state.all.allStatus,
+    failedCode: state => state.all.allStatus || 0,
     channels: state => state.app.channels,
     logChannels: state => state.all.all ? state.all.all[1] : []
 })(pure(All));

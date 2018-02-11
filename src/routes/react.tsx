@@ -17,9 +17,11 @@ const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Re
         path: '/details/:slotId',
         exact: true,
         fetchInitialState: async (state: Store, req: Request, match: match<{ slotId: string }>) => {
+            const slot = await getSlot(req, match.params.slotId);
             return _.merge(state, {
                 slot: {
-                    slot: await getSlot(req, match.params.slotId) || undefined
+                    slot: slot || undefined,
+                    slotStatus: slot ? false : 404
                 }
             });
         }

@@ -6,7 +6,7 @@ import { INVALIDATE_ALL } from '../constant/actions';
 
 const initialState: StoreAll = {
     date: moment(),
-    isAllFailed: false,
+    allStatus: false,
     all: undefined
 };
 export const all = (state: StoreAll = initialState, action: Actions): StoreAll => {
@@ -16,13 +16,13 @@ export const all = (state: StoreAll = initialState, action: Actions): StoreAll =
             return {
                 ...state,
                 date: moment.unix(offset).startOf('day'),
-                isAllFailed: false,
+                allStatus: false,
                 all: action.payload
             };
         case 'FETCH_FAILED_ALL':
-            return { ...state, isAllFailed: true, all: undefined };
+            return { ...state, allStatus: action.meta.status, all: undefined };
         case INVALIDATE_ALL:
-            return { ...state, isAllFailed: false, all: undefined };
+            return { ...state, allStatus: false, all: undefined };
         default:
             return state;
     }

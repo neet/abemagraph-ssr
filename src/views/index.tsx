@@ -87,7 +87,7 @@ Highstock.setOptions({
     }
 });
 
-$(document).on('click', '.navbar-collapse a:not(.dropdown-toggle)', () => $('.navbar-toggle').trigger('click'));
+$(document).on('click', '.navbar-collapse a:not(.dropdown-toggle)', () => $('.navbar-toggle:visible').trigger('click'));
 hydrate((
     <Provider store={store}>
         <Router>
