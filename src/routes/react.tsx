@@ -87,6 +87,7 @@ export const renderSSR = async (req: Request, res: Response) => {
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${context.title}</title>
+<link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon" />
 <link href="/assets/app.css" rel="stylesheet" />
 </head>
 <body>
