@@ -43,7 +43,7 @@ const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Re
         fetchInitialState: async (state: Store, req: Request, match: match<{ date?: string }>) => {
             let date = moment(match.params.date, 'YYYYMMDD');
             if (!date.isValid()) date = moment();
-            const all = await allLog(req, date);
+            const all = await allLog(req, date.format('YYYYMMDD'));
             if (!all) return state;
             return _.merge(state, {
                 all: {

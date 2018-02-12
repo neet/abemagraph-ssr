@@ -75,10 +75,10 @@ export const slotLog = async (req: Request, slotId: string): Promise<number[][] 
     }
 };
 
-export const allLog = async (req: Request, date: moment.Moment) => {
-    const dateF = date.format('YYYYMMDD');
+export const allLog = async (req: Request, date: string) => {
+    if (!date.match(/^\d{8}$/)) return null;
     const collector = req.app.get('collector') as Collector;
-    const allCursor = await collector.allDb.find({ date: dateF });
+    const allCursor = await collector.allDb.find({ date });
     if (await allCursor.hasNext()) {
         const allArr = await allCursor.toArray();
         const channels = _.uniq(_.flatMap(allArr, item => Object.keys(item.ch))).sort();
@@ -129,10 +129,7 @@ router.get('/logs/:slotId', async (req, res, next) => {
 });
 
 router.get('/all/:date', async (req, res, next) => {
-    const date = moment(req.params.date, 'YYYYMMDD');
-    if (!date.isValid())
-        return res.status(400).end('bad request');
-    const log = await allLog(req, date);
+    const log = await allLog(req, req.params.date);
     if (log)
         res.json(log).end();
     else
