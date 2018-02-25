@@ -40,3 +40,17 @@ export type AllLog = Array<{
         }
     }
 }>;
+
+export type ESData = {
+    casts: string[],
+    channel: string,
+    content: string,
+    crews: string[],
+    end: string,
+    flags: string[],
+    group?: string,
+    hashtag?: string,
+    series: string,
+    start: string,
+    title: string
+};

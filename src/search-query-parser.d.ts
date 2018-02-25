@@ -4,7 +4,7 @@ declare module 'search-query-parser' {
         ranges?: string[];
     };
     type Result = {
-        text: string;
+        text?: string;
         offsets: Array<{
             offsetStart: number;
             offsetEnd: number;
@@ -17,7 +17,7 @@ declare module 'search-query-parser' {
         [key: string]: {
             from?: string;
             to?: string;
-        } | string[] | string | {};
+        } | string[] | string | {} | undefined;
     }
-    function parse(query: string, options?: Options): Result;
+    function parse(query: string, options?: Options): Result | string;
 }

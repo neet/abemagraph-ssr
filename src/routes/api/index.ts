@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import * as moment from 'moment';
+import { parse } from 'search-query-parser';
 import { Collector } from '../../collector';
 
 import * as _ from 'lodash';
@@ -100,6 +101,122 @@ export const allLog = async (req: Request, date: string) => {
         return null;
     }
 };
+
+export const search = async (req: Request, { query, page }: { query: string, page: number }) => {
+    if (typeof query !== 'string' || query.length > 1024 || query.length <= 0) return null;
+    if (isNaN(page)) return null;
+    const collector = req.app.get('collector') as Collector;
+    const queryOptions = {
+        keywords: ['channel', 'flag', 'since', 'until', 'sort', 'group', 'series']
+    };
+    const queryParsed = parse(query, queryOptions);
+    const must: Array<{}> = [];
+    const sort: Array<{}> = ['_score'];
+    if (typeof queryParsed === 'string') {
+        must.push({
+            simple_query_string: {
+                fields: ['title', 'content', 'hashtag', 'crews', 'casts'],
+                query: queryParsed,
+                default_operator: 'and'
+            }
+        });
+    } else {
+        if (queryParsed.text) {
+            must.push({
+                simple_query_string: {
+                    fields: ['title', 'content', 'hashtag', 'crews', 'casts'],
+                    query: queryParsed.text,
+                    default_operator: 'and'
+                }
+            });
+        }
+        if (queryParsed.channel) {
+            const channel = _.flatMap([queryParsed.channel], m => m as string).filter(m => m.match(/^[a-z0-9\-]{1,20}$/));
+            must.push({ terms: { channel } });
+        }
+        if (queryParsed.series) {
+            const series = _.flatMap([queryParsed.series], m => m as string).filter(m => m.match(/^[a-z0-9\-_]{1,20}$/));
+            must.push({ terms: { series } });
+        }
+        if (queryParsed.group) {
+            const group = _.flatMap([queryParsed.group], m => m as string).filter(m => m.match(/^[a-zA-Z0-9]{1,20}$/));
+            must.push({ terms: { group } });
+        }
+        const range: { from?: string, to?: string } = {};
+        if (typeof queryParsed.since === 'string') {
+            const since = queryParsed.since === 'now' ? moment() : moment(queryParsed.since);
+            if (since.isValid())
+                range.from = since.format();
+        }
+        if (typeof queryParsed.until === 'string') {
+            const until = queryParsed.until === 'now' ? moment() : moment(queryParsed.until);
+            if (until.isValid())
+                range.to = until.format();
+        }
+        if (range.from || range.to) {
+            must.push({ range: { start: range } });
+        }
+        if (typeof queryParsed.sort === 'string' && queryParsed.sort.match(/^(start|title)\/(desc|asc)$/)) {
+            const [key, order] = queryParsed.sort.split('/');
+            sort.unshift({ [key]: { order } });
+        }
+        if (queryParsed.flag) {
+            const flags = _.compact(_.flatMap([queryParsed.flag], m => m as string))
+                .filter(m => m.match(/^(first|last|live|bingeWatching|timeshiftFree|timeshift|drm|recommendation)$/i))
+                .map(m => m.toLowerCase().replace('bingewatching', 'bingeWatching').replace('timeshiftfree', 'timeshiftFree'));
+            must.push({ terms: { flags } });
+        }
+    }
+    const esQuery = {
+        query: { bool: { must } },
+        size: 50,
+        from: page * 50,
+        highlight: {
+            pre_tags: ['<mark search>'],
+            post_tags: ['</mark>'],
+            fields: {
+                'title': {
+                    fragment_size: 500,
+                    number_of_fragments: 1,
+                    no_match_size: 500,
+                    encoder: 'html'
+                },
+                'content': {
+                    fragment_size: 500,
+                    number_of_fragments: 1,
+                    no_match_size: 500,
+                    encoder: 'html',
+                },
+                'hashtag': {
+                    fragment_size: 100,
+                    number_of_fragments: 1,
+                    no_match_size: 0,
+                    encoder: 'html',
+                }
+            },
+        },
+        sort,
+        timeout: 10000
+    };
+    const esResult = await collector.search(esQuery);
+    if (esResult.timed_out) return null;
+    return {
+        total: esResult.hits.total,
+        took: esResult.took,
+        hits: esResult.hits.hits.map(item => ({
+            title: item.highlight.title ? item.highlight.title[0] : item._source.title,
+            channelId: item._source.channel,
+            id: item._id,
+            content: item.highlight.content ? item.highlight.content[0] : item._source.content,
+            hashtag: item.highlight.hashtag ? item.highlight.hashtag[0] : item._source.hashtag,
+            flags: item._source.flags,
+            start: moment(item._source.start),
+            end: moment(item._source.end),
+            score: item._score
+        }))
+    };
+};
+
 router.get('/broadcast', async (req, res, next) => {
     res.json(await broadcast(req)).end();
 });
@@ -135,4 +252,17 @@ router.get('/all/:date', async (req, res, next) => {
     else
         res.status(404).end('404 not found');
 });
+
+router.get('/search', async (req, res, next) => {
+    const result = await search(req, {
+        query: req.query.q || '',
+        page: Number(req.query.page || 0)
+    });
+    if (result)
+        res.json(result).end();
+    else
+        res.status(400).end('bad request');
+});
+
+router.use((req, res, next) => res.status(404).end('404 not found'));
 export default router;

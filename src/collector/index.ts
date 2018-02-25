@@ -9,7 +9,7 @@ import { downloadTimetable, storeTimetableToES } from './timetable';
 import { app as appLogger } from '../logger';
 import { Slot, Program, Channel, Timetable } from '../types/abema';
 import { getSlotAudience } from './audience';
-import { Log, All } from '../types/abemagraph';
+import { Log, All, ESData } from '../types/abemagraph';
 import { sleep } from '../utils/sleep';
 import { purgeId } from '../utils/purge-id';
 
@@ -149,6 +149,13 @@ export class Collector {
         }));
     }
 
+    async search(query) {
+        return await this.es.search<ESData>({
+            index: Config.elasticsearch.index,
+            type: Config.elasticsearch.type,
+            body: query
+        });
+    }
     startSchedule() {
         if (this.cancel) return;
         this.cancelPromise = new Promise(resolve => this.cancel = () => resolve());
