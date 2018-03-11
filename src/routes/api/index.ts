@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import * as moment from 'moment';
 import { parse } from 'search-query-parser';
-import { Collector } from '../../collector';
+import { collector } from '../../collector';
 
 import * as _ from 'lodash';
 import { Stats, BroadcastSlot, AllLogCompressed } from '../../types/abemagraph';
@@ -10,7 +10,6 @@ import { Channel, Slot } from '../../types/abema';
 const router = Router();
 
 export const broadcast = async (req: Request): Promise<BroadcastSlot[]> => {
-    const collector = req.app.get('collector') as Collector;
     const slots = collector.currentSlots;
     const logs = await collector.findLogs(...slots.map(s => s.id));
     const lastLogs: { [slot: string]: Stats } = Object.keys(logs).reduce((obj, key) => {
@@ -42,7 +41,6 @@ export const broadcast = async (req: Request): Promise<BroadcastSlot[]> => {
 };
 
 export const broadcastChannels = (req: Request): Channel[] => {
-    const collector = req.app.get('collector') as Collector;
     const channels = collector.channels;
     if (channels)
         return channels.map(channel => ({ id: channel.id, name: channel.name.replace(/チャンネル$/, ''), order: channel.order })) || [];
@@ -51,19 +49,16 @@ export const broadcastChannels = (req: Request): Channel[] => {
 };
 
 export const channels = async (req: Request): Promise<Channel[]> => {
-    const collector = req.app.get('collector') as Collector;
     const cursor = await collector.channelsDb.find();
     return (await cursor.toArray()).map(channel => ({ id: channel.id, name: channel.name.replace(/チャンネル$/, ''), order: channel.order }));
 };
 
 export const getSlot = async (req: Request, slotId: string): Promise<Slot | null> => {
-    const collector = req.app.get('collector') as Collector;
     const slots = await collector.findSlot(slotId);
     return slots.length === 1 ? slots[0] : null;
 };
 
 export const slotLog = async (req: Request, slotId: string): Promise<number[][] | null> => {
-    const collector = req.app.get('collector') as Collector;
     const slots = await collector.findSlot(slotId);
     if (slots.length !== 1) return null;
     const log = await collector.logsDb.findOne({ _id: slotId });
@@ -78,7 +73,6 @@ export const slotLog = async (req: Request, slotId: string): Promise<number[][] 
 
 export const allLog = async (req: Request, date: string) => {
     if (!date.match(/^\d{8}$/)) return null;
-    const collector = req.app.get('collector') as Collector;
     const allCursor = await collector.allDb.find({ date });
     if (await allCursor.hasNext()) {
         const allArr = await allCursor.toArray();
@@ -105,7 +99,6 @@ export const allLog = async (req: Request, date: string) => {
 export const search = async (req: Request, { query, page }: { query: string, page: number }) => {
     if (typeof query !== 'string' || query.length > 1024 || query.length <= 0) return null;
     if (isNaN(page)) return null;
-    const collector = req.app.get('collector') as Collector;
     const queryOptions = {
         keywords: ['channel', 'flag', 'since', 'until', 'sort', 'group', 'series']
     };

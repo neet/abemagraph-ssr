@@ -13,7 +13,7 @@ import { Log, All, ESData } from '../types/abemagraph';
 import { sleep } from '../utils/sleep';
 import { purgeId } from '../utils/purge-id';
 
-export class Collector {
+class Collector {
     slotsDb: Collection<Slot & { programs: string[] }>;
     programsDb: Collection<Program>;
     logsDb: Collection<Log>;
@@ -21,10 +21,15 @@ export class Collector {
     allDb: Collection<All>;
     timetable?: Timetable;
 
+    private db: Db;
+    private es: Client;
     private cancelPromise: Promise<void> | null = null;
     private cancel: Function | null = null;
     private promises: Array<Promise<void>> = [];
-    constructor(public db: Db, public es: Client) {
+    
+    initialize(db: Db, es: Client) {
+        this.db = db;
+        this.es = es;
         this.slotsDb = db.collection('slots');
         this.programsDb = db.collection('programs');
         this.logsDb = db.collection('logs');
@@ -33,6 +38,7 @@ export class Collector {
     }
 
     async updateFullTimetable() {
+        if (!this.db || !this.es) throw new Error();
         this.timetable = await downloadTimetable();
 
         await writeFile(Config.cache.timetable, JSON.stringify(this.timetable), { encoding: 'utf8' });
@@ -77,6 +83,7 @@ export class Collector {
     }
 
     async collectSlotLog() {
+        if (!this.db || !this.es) return;
         const slots = this.currentSlots;
         const audiences = await getSlotAudience(...slots.map(slot => slot.id));
         const now = Math.floor(Date.now() / 1000);
@@ -127,17 +134,20 @@ export class Collector {
     }
 
     async getChannel(...names: string[]): Promise<Channel[]> {
+        if (!this.db || !this.es) throw new Error();
         const cursor = await this.channelsDb.find({ $or: names.map(name => ({ _id: name })) });
         return (await cursor.toArray()).map(purgeId);
     }
 
     async findLogs(...slotIds: string[]): Promise<{ [slot: string]: Log }> {
+        if (!this.db || !this.es) throw new Error();
         const cursor = await this.logsDb.find({ $or: slotIds.map(_id => ({ _id })) });
         const result = await cursor.toArray();
         return result.reduce((list: { [slot: string]: Log }, item) => ({ ...list, [item._id]: item }), {});
     }
 
     async findSlot(...slotIds: string[]): Promise<Slot[]> {
+        if (!this.db || !this.es) throw new Error();
         const slotCursor = await this.slotsDb.find({ $or: slotIds.map(slotId => ({ _id: slotId })) });
         const slots = (await slotCursor.toArray()).map(purgeId);
         if (slots.length === 0) return [];
@@ -150,6 +160,7 @@ export class Collector {
     }
 
     async search(query) {
+        if (!this.db || !this.es) throw new Error();
         return await this.es.search<ESData>({
             index: Config.elasticsearch.index,
             type: Config.elasticsearch.type,
@@ -157,6 +168,7 @@ export class Collector {
         });
     }
     startSchedule() {
+        if (!this.db || !this.es) throw new Error();
         if (this.cancel) return;
         this.cancelPromise = new Promise(resolve => this.cancel = () => resolve());
 
@@ -188,3 +200,5 @@ export class Collector {
         appLogger.info('Scheduler stopped');
     }
 }
+
+export const collector = new Collector();
