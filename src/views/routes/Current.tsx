@@ -96,45 +96,47 @@ class Current extends React.Component<ReduxProps<{
                     return a.channelId.localeCompare(b.channelId);
             }
         });
+        const viewTotal = slots.reduce((total, item) => total += item.stats ? item.stats.view : 0, 0);
+        const commentTotal = slots.reduce((total, item) => total += item.stats ? item.stats.comment : 0, 0);
         return (
             <>
-            <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
-            <PageHeader text='現在放送中の番組'>
-                <div className='pull-right'>
-                    <select className='form-control' onChange={e => this.setSortUrl(e)} value={sortBy}>
-                        <option value='ch'>チャンネル順</option>
-                        <option value='v'>閲覧数</option>
-                        <option value='c'>コメント数</option>
-                        <option value='vpm'>閲覧数の勢い</option>
-                        <option value='cpm'>コメントの勢い</option>
-                    </select>
+                <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
+                <PageHeader text='現在放送中の番組'>
+                    <div className='pull-right'>
+                        <select className='form-control' onChange={e => this.setSortUrl(e)} value={sortBy}>
+                            <option value='ch'>チャンネル順</option>
+                            <option value='v'>閲覧数</option>
+                            <option value='c'>コメント数</option>
+                            <option value='vpm'>閲覧数の勢い</option>
+                            <option value='cpm'>コメントの勢い</option>
+                        </select>
+                    </div>
+                </PageHeader>
+                <dl className='dl-horizontal'>
+                    <dt>総閲覧数 <Glyphicon glyph='user' /></dt>
+                    <dd>{viewTotal === 0 ? '不明' : viewTotal}</dd>
+                    <dt>総コメント数 <Glyphicon glyph='comment' /></dt>
+                    <dd>{commentTotal === 0 ? '不明' : commentTotal}</dd>
+                </dl>
+                <div className='list-group'>
+                    {slots.map(slot => (
+                        <Link to={`/details/${slot.id}`} className='list-group-item' key={slot.id}>
+                            <h4 className='list-group-item-heading'>
+                                <Mark mark={slot.mark} showItem={['first', 'last', 'live', 'newcomer', 'bingeWatching']} />
+                                {slot.title}
+                                <span className='pull-right label label-success'>{this.findChannelName(slot.channelId)}</span>
+                            </h4>
+                            <p className='list-group-item-text'>
+                                {`${moment.unix(slot.startAt).format('YYYY/MM/DD(ddd) HH:mm:ss')} ~ ${moment.unix(slot.startAt + slot.duration).format('HH:mm:ss')}`}
+                                <br />
+                                {slot.stats ? (
+                                    `閲覧数:${slot.stats.view} (${mounted ? slot.vpm.toFixed(2) : '-'} vpm) ` +
+                                    `コメント:${slot.stats.comment} (${mounted ? slot.cpm.toFixed(2) : '-'} cpm)`
+                                ) : '閲覧数: - (- vpm) コメント: - (- cpm)'}
+                            </p>
+                        </Link>
+                    ))}
                 </div>
-            </PageHeader>
-            <dl className='dl-horizontal'>
-                <dt>総閲覧数 <Glyphicon glyph='user' /></dt>
-                <dd>{slots.reduce((total, item) => total += item.stats ? item.stats.view : 0, 0)}</dd>
-                <dt>総コメント数 <Glyphicon glyph='comment' /></dt>
-                <dd>{slots.reduce((total, item) => total += item.stats ? item.stats.comment : 0, 0)}</dd>
-            </dl>
-            <div className='list-group'>
-                {slots.map(slot => (
-                    <Link to={`/details/${slot.id}`} className='list-group-item' key={slot.id}>
-                        <h4 className='list-group-item-heading'>
-                            <Mark mark={slot.mark} showItem={['first', 'last', 'live', 'newcomer', 'bingeWatching']} />
-                            {slot.title}
-                            <span className='pull-right label label-success'>{this.findChannelName(slot.channelId)}</span>
-                        </h4>
-                        <p className='list-group-item-text'>
-                            {`${moment.unix(slot.startAt).format('YYYY/MM/DD(ddd) HH:mm:ss')} ~ ${moment.unix(slot.startAt + slot.duration).format('HH:mm:ss')}`}
-                            <br />
-                            {slot.stats ? (
-                                `閲覧数:${slot.stats.view} (${mounted ? slot.vpm.toFixed(2) : '-'} vpm) ` +
-                                `コメント:${slot.stats.comment} (${mounted ? slot.cpm.toFixed(2) : '-'} cpm)`
-                            ) : '閲覧数: - (- vpm) コメント: - (- cpm)'}
-                        </p>
-                    </Link>
-                ))}
-            </div>
             </>
         );
     }
