@@ -1,29 +1,24 @@
 import * as moment from 'moment';
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { StoreAll } from '../constant/store';
-import { Actions } from '../actions/index';
 import { INVALIDATE_ALL } from '../constant/actions';
+import { invalidateAll, allFetch } from '../actions/all';
 
 const initialState: StoreAll = {
     date: moment(),
     allStatus: false,
     all: undefined
 };
-export const all = (state: StoreAll = initialState, action: Actions): StoreAll => {
-    switch (action.type) {
-        case 'FETCH_RECEIVED_ALL':
-            const [offset] = action.payload;
-            return {
-                ...state,
-                date: moment.unix(offset).startOf('day'),
-                allStatus: false,
-                all: action.payload
-            };
-        case 'FETCH_FAILED_ALL':
-            return { ...state, allStatus: action.meta.status, all: undefined };
-        case INVALIDATE_ALL:
-            return { ...state, allStatus: false, all: undefined };
-        default:
-            return state;
-    }
-};
+export const all = reducerWithInitialState(initialState)
+    .case(allFetch.done, (state, payload) => {
+        const [offset] = payload;
+        return {
+            ...state,
+            date: moment.unix(offset).startOf('day'),
+            allStatus: false,
+            all: payload
+        };
+    })
+    .case(allFetch.failed, (state, payload) => ({ ...state, allStatus: payload.status, all: undefined }))
+    .case(invalidateAll, state => ({ ...state, allStatus: false, all: undefined }));

@@ -9,4 +9,3 @@ export default {
     slot,
     all
 };
-export type Actions = broadcast.Actions | app.Actions | slot.Actions | all.Actions;

@@ -20,11 +20,11 @@ export interface ActionProps {
 
 export type ReduxProps<T> = ActionProps & T;
 
-function bind(actionMap: ActionMap, dispatch: Dispatch<{}>): ActionCreatorsMapObject {
-    const keys = Object.keys(actionMap);
-    if (typeof actionMap[keys[0]] === 'function') {
-        return bindActionCreators(actionMap as ActionCreatorsMapObject, dispatch);
+function bind(actionMap: ActionMap | Function, dispatch: Dispatch<{}>): {} {
+    if (typeof actionMap === 'function') {
+        return ((...params) => dispatch(actionMap(...params)));
     }
+    const keys = Object.keys(actionMap);
     return keys.reduce((acc, key) => Object.assign(acc, { [key]: bind(actionMap[key] as ActionMap, dispatch) }), {});
 }
 

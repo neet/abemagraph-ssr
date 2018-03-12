@@ -1,14 +1,10 @@
+import { reducerWithInitialState } from 'typescript-fsa-reducers';
+
 import { StoreApp } from '../constant/store';
-import { Actions } from '../actions/index';
+import { channelsFetch } from '../actions/app';
 
 const initialState: StoreApp = {
     channels: []
 };
-export const app = (state: StoreApp = initialState, action: Actions): StoreApp => {
-    switch (action.type) {
-        case 'FETCH_RECEIVED_CHANNELS':
-            return { ...state, channels: action.payload };
-        default:
-            return state;
-    }
-};
+export const app = reducerWithInitialState(initialState)
+    .case(channelsFetch.done, (state, payload) => ({ ...state, channels: payload }));

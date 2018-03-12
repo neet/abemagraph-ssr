@@ -1,9 +1,5 @@
-import { TAction } from '../utils/connect';
 import { Channel } from '../../types/abema';
-import { fetchAction } from '../utils/fetch-middleware';
+import { fetchActionCreator } from '../utils/fetch-middleware';
 
-export const fetchChannels = () => fetchAction('/api/channels', 'CHANNELS');
-
-type IFetchedChannels = TAction<'FETCH_RECEIVED_CHANNELS', Channel[]>;
-
-export type Actions = IFetchedChannels;
+export const channelsFetch = fetchActionCreator<Channel[]>('CAHNNELS');
+export const fetchChannels = () => channelsFetch.fetch('/api/channels');
