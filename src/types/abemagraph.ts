@@ -1,3 +1,6 @@
+import * as moment from 'moment';
+import { SortType } from '../views/constant/const';
+
 export interface Log {
     log: {
         [time: string]: {
@@ -54,3 +57,14 @@ export type ESData = {
     start: string,
     title: string
 };
+
+export interface ParsedQuery {
+    keyword: string;
+    channel: string[];
+    flag: string[];
+    sort?: SortType;
+    since?: [string, moment.Moment];
+    until?: [string, moment.Moment];
+    group: string[];
+    series: string[];
+}

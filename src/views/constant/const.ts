@@ -22,3 +22,11 @@ export const markLongName = {
 };
 
 export type MarkType = 'first' | 'last' | 'live' | 'bingeWatching' | 'recommendation' | 'drm' | 'newcomer' | 'timeshift' | 'timeshiftFree';
+
+export const sortType = {
+    'start/asc': '開始時間/昇順',
+    'start/desc': '開始時間/降順',
+    'title/asc': 'タイトル/昇順',
+    'title/desc': 'タイトル/降順'
+};
+export type SortType = 'start/asc' | 'start/desc' | 'title/asc' | 'title/desc';

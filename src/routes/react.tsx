@@ -9,15 +9,17 @@ import * as moment from 'moment';
 
 import { Routes } from '../views/Routes';
 import reducers from '../views/reducers';
-import { broadcast, broadcastChannels, getSlot, allLog } from './api/index';
 import { Store } from '../views/constant/store';
+import { getSlot } from './api/media';
+import { broadcast, broadcastChannels } from './api/broadcast';
+import { allLog } from './api/logs';
 
 const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Request, match: match<{}>) => Promise<Store> }> = [
     {
         path: '/details/:slotId',
         exact: true,
         fetchInitialState: async (state: Store, req: Request, match: match<{ slotId: string }>) => {
-            const slot = await getSlot(req, match.params.slotId);
+            const slot = await getSlot(match.params.slotId);
             return _.merge(state, {
                 slot: {
                     slot: slot || undefined,
@@ -32,7 +34,7 @@ const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Re
         fetchInitialState: async (state: Store, req: Request, match: match<{ slotId: string }>) => {
             return _.merge(state, {
                 broadcast: {
-                    slots: await broadcast(req),
+                    slots: await broadcast(),
                     updated: Date.now()
                 }
             });
@@ -43,7 +45,7 @@ const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Re
         fetchInitialState: async (state: Store, req: Request, match: match<{ date?: string }>) => {
             let date = moment(match.params.date, 'YYYYMMDD');
             if (!date.isValid()) date = moment();
-            const all = await allLog(req, date.format('YYYYMMDD'));
+            const all = await allLog(date.format('YYYYMMDD'));
             if (!all) return state;
             return _.merge(state, {
                 all: {
@@ -63,7 +65,7 @@ export const renderSSR = async (req: Request, res: Response) => {
         return prom.then((state: Store) => m && route.fetchInitialState ? route.fetchInitialState(state, req, m) : Promise.resolve(state));
     }, Promise.resolve({
         app: {
-            channels: broadcastChannels(req)
+            channels: await broadcastChannels()
         }
     }));
     const store = createStore(reducers, initialState);
