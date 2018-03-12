@@ -46,8 +46,12 @@ export function validateAndParseSearch(query: string): [string[], ParsedQuery] {
                 const until = moment(parsed.until);
                 if (until.isValid())
                     search.until = [parsed.until, until];
-                else
-                    errors.push('終了時間指定が不正です');
+                else {
+                    if (parsed.until === 'now')
+                        search.until = ['now', moment()];
+                    else
+                        errors.push('終了時間指定が不正です');
+                }
             }
         }
         if (parsed.since) {
@@ -57,8 +61,12 @@ export function validateAndParseSearch(query: string): [string[], ParsedQuery] {
                 const since = moment(parsed.since);
                 if (since.isValid())
                     search.since = [parsed.since, since];
-                else
-                    errors.push('開始時間指定が不正です');
+                else {
+                    if (parsed.since === 'now')
+                        search.since = ['now', moment()];
+                    else
+                        errors.push('開始時間指定が不正です');
+                }
             }
         }
         return [errors, search];
