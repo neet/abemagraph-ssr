@@ -8,41 +8,38 @@ import { validateAndParseSearch } from '../../utils/search';
 
 export class SearchBox extends React.Component<{
     channels: string[],
-    search?: string,
+    search: string,
     onChange?: (search: string) => void,
-    onSearchClick?: (search: string) => void
-}, {
-        search: string,
-        errors: string[]
-    }> {
+    onSearchClick?: (search?: string) => void
+}, { errors: string[] }> {
     constructor(props) {
         super(props);
         this.state = {
-            search: this.props.search || '',
             errors: []
         };
     }
 
     onChange(e: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({ search: e.target.value });
-        this.validateSearchDebounce();
         if (this.props.onChange)
-            this.props.onChange(this.state.search);
+            this.props.onChange(e.target.value);
+    }
+
+    componentWillUpdate(nextProps: { search: string }) {
+        if (nextProps.search !== this.props.search) {
+            this.validateSearchDebounce();
+        }
     }
 
     setOption(e: React.MouseEvent<{}>, name: string, value: string, multiple = false) {
         e.preventDefault();
-        this.setState({
-            search: this.state.search
-                .replace(new RegExp(`${name}:${multiple ? value : '\\S+'}`, 'ig'), '')
-                .concat(` ${name}:${value}`).replace(/\s+/g, ' ').trim()
-        });
+        const nextSearch = this.props.search.replace(new RegExp(`${name}:${multiple ? value : '\\S+'}`, 'ig'), '')
+            .concat(` ${name}:${value}`).replace(/\s+/g, ' ').trim();
         if (this.props.onChange)
-            this.props.onChange(this.state.search);
+            this.props.onChange(nextSearch);
     }
 
     validateSearch() {
-        const [errors] = validateAndParseSearch(this.state.search);
+        const [errors] = validateAndParseSearch(this.props.search);
         this.setState({ errors });
         return errors.length === 0;
     }
@@ -52,17 +49,17 @@ export class SearchBox extends React.Component<{
         e.preventDefault();
         if (this.validateSearch()) {
             if (this.props.onSearchClick)
-                this.props.onSearchClick(this.state.search);
+                this.props.onSearchClick(this.props.search);
         }
     }
 
     render() {
-        const { errors, search } = this.state;
+        const { errors } = this.state;
         return (
             <form className='form-inline' onSubmit={e => this.onSubmit(e)}>
                 <div className={['input-group'].concat(errors.length !== 0 ? ['has-error'] : []).join(' ')}>
                     <input type='text' name='q' className='form-control' size={80}
-                        placeholder='channel:anime24 until:now' value={search}
+                        placeholder='channel:anime24 until:now' value={this.props.search}
                         onChange={e => this.onChange(e)} />
                     <span className='input-group-btn'>
                         <button type='button' className='btn btn-success dropdown-toggle' data-toggle='dropdown'>
