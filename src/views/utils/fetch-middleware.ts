@@ -19,7 +19,7 @@ export const fetchMiddleware = ({ dispatch }: MiddlewareAPI<{}>) => (next: Dispa
             if (err instanceof Error)
                 dispatch({ type: `FETCH_FAILED_${response}`, payload: { status: 600 } });
             else
-                dispatch({ type: `FETCH_FAILED_${response}`, payload: { status: 601, err } });
+                dispatch({ type: `FETCH_FAILED_${response}`, payload: { status: err.status || 500, err } });
         });
         return next({ type: `FETCH_REQUEST_${response}` });
     }
