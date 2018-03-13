@@ -63,12 +63,12 @@ export const renderSSR = async (req: Request, res: Response) => {
     const initialState = await routeInfo.reduce((prom, route) => {
         const m = matchPath(req.url, route);
         return prom.then((state: Store) => m && route.fetchInitialState ?
-            route.fetchInitialState(state, req, m) : Promise.resolve(state));
+            route.fetchInitialState(state, req, m).catch(() => state) : Promise.resolve(state));
     }, Promise.resolve({
         app: {
             channels: await broadcastChannels()
         }
-    })).catch(() => ({}));
+    }));
     const store = createStore(reducers, initialState);
     const context: { url?: string, status: number, title: string } = {
         status: 200,
