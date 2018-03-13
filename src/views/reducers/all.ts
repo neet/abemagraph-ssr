@@ -2,7 +2,6 @@ import * as moment from 'moment';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { StoreAll } from '../constant/store';
-import { INVALIDATE_ALL } from '../constant/actions';
 import { invalidateAll, allFetch } from '../actions/all';
 
 const initialState: StoreAll = {

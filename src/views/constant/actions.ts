@@ -1,2 +1,0 @@
-export const INVALIDATE_SLOT = 'INVALIDATE_SLOT';
-export const INVALIDATE_ALL = 'INVALIDATE_ALL';

@@ -1,7 +1,6 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { StoreSlot } from '../constant/store';
-import { INVALIDATE_SLOT } from '../constant/actions';
 import { slotFetch, slotLogsFetch, invalidateSlot } from '../actions/slot';
 
 const initialState: StoreSlot = {
