@@ -68,3 +68,21 @@ export interface ParsedQuery {
     group: string[];
     series: string[];
 }
+
+export interface SearchResultItem {
+    title: string;
+    channelId: string;
+    id: string;
+    content: string;
+    hashtag: string;
+    flags: string[];
+    start: string;
+    end: string;
+    score: number;
+}
+
+export interface SearchResult {
+    total: number;
+    took: number;
+    hits: SearchResultItem[];
+}
