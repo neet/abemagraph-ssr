@@ -45,7 +45,7 @@ export const search = async ({ query, page }: { query: string, page: number }) =
         const [key, order] = queryParsed.sort.split('/');
         sort.unshift({ [key]: { order } });
     }
-    if (queryParsed.flag) {
+    if (queryParsed.flag.length > 0) {
         must.push({ terms: { flags: queryParsed.flag } });
     }
     const esQuery = {
