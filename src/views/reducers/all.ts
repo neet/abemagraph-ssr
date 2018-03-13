@@ -2,7 +2,7 @@ import * as moment from 'moment';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { StoreAll } from '../constant/store';
-import { invalidateAll, allFetch } from '../actions/all';
+import { invalidateAll, allApi } from '../actions/all';
 
 const initialState: StoreAll = {
     date: moment(),
@@ -10,7 +10,7 @@ const initialState: StoreAll = {
     all: undefined
 };
 export const all = reducerWithInitialState(initialState)
-    .case(allFetch.done, (state, payload) => {
+    .case(allApi.done, (state, payload) => {
         const [offset] = payload;
         return {
             ...state,
@@ -19,5 +19,5 @@ export const all = reducerWithInitialState(initialState)
             all: payload
         };
     })
-    .case(allFetch.failed, (state, payload) => ({ ...state, allStatus: payload.status, all: undefined }))
+    .case(allApi.failed, (state, payload) => ({ ...state, allStatus: payload.status, all: undefined }))
     .case(invalidateAll, state => ({ ...state, allStatus: false, all: undefined }));

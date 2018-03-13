@@ -1,7 +1,7 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { StoreBroadcast } from '../constant/store';
-import { broadcastFetch } from '../actions/broadcast';
+import { broadcastApi } from '../actions/broadcast';
 
 const initialState: StoreBroadcast = {
     slots: [],
@@ -10,6 +10,6 @@ const initialState: StoreBroadcast = {
     isFetching: false
 };
 export const broadcast = reducerWithInitialState(initialState)
-    .case(broadcastFetch.done, (state, payload) => ({ ...state, slots: payload, updated: Date.now(), isFetching: false, isFailed: false }))
-    .case(broadcastFetch.started, state => ({ ...state, isFetching: true }))
-    .case(broadcastFetch.failed, state => ({ ...state, isFetching: false, isFailed: true, slots: [] }));
+    .case(broadcastApi.done, (state, payload) => ({ ...state, slots: payload, updated: Date.now(), isFetching: false, isFailed: false }))
+    .case(broadcastApi.started, state => ({ ...state, isFetching: true }))
+    .case(broadcastApi.failed, state => ({ ...state, isFetching: false, isFailed: true, slots: [] }));
