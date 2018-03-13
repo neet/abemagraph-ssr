@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import { Request } from 'express';
+import { ServiceUnavailable } from 'http-errors';
 
 import { BroadcastSlot, Stats } from '../../types/abemagraph';
 import { collector } from '../../collector';
@@ -43,6 +44,6 @@ export const broadcastChannels = async (): Promise<Channel[]> => {
     if (channels)
         return channels.map(channel => ({ id: channel.id, name: channel.name.replace(/チャンネル$/, ''), order: channel.order })) || [];
     else
-        return [];
+        throw new ServiceUnavailable('No channels, server did not start correctly');
 };
 api.get('/broadcast/channels', broadcastChannels);

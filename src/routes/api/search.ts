@@ -1,15 +1,16 @@
 import * as moment from 'moment';
 import { Request } from 'express';
+import { BadRequest } from 'http-errors';
 
 import { validateAndParseSearch } from '../../utils/search';
 import { collector } from '../../collector';
 import { api } from './index';
 
 export const search = async ({ query, page }: { query: string, page: number }) => {
-    if (typeof query !== 'string' || query.length > 1024 || query.trim().length <= 0) return null;
-    if (isNaN(page)) return null;
+    if (typeof query !== 'string' || query.length > 1024 || query.trim().length <= 0)
+        throw new BadRequest('Query missed or too long');
     const [errors, queryParsed] = validateAndParseSearch(query);
-    if (errors.length > 0) throw new Error('Invalid query');
+    if (errors.length > 0) throw new BadRequest('Invalid query');
     const must: Array<{}> = [];
     const sort: Array<{}> = ['_score'];
     if (queryParsed.keyword.length > 0) {
@@ -97,7 +98,7 @@ export const search = async ({ query, page }: { query: string, page: number }) =
     };
 };
 api.get('/search', search, (param, { q: query, page: p }) => {
-    let page = Number(p);
-    if (isNaN(page)) page = 0;
+    const page = p ? Number(p) : 0;
+    if (isNaN(page)) throw new BadRequest('Page must be number');
     return { query, page };
 });

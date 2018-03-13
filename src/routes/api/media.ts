@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { NotFound } from 'http-errors';
 
 import { Channel, Slot } from '../../types/abema';
 import { collector } from '../../collector';
@@ -12,6 +13,8 @@ api.get('/channels', channels);
 
 export const getSlot = async (slotId: string): Promise<Slot | null> => {
     const slots = await collector.findSlot(slotId);
-    return slots.length === 1 ? slots[0] : null;
+    if (slots.length !== 1)
+        throw new NotFound('Slot not found');
+    return slots[0];
 };
 api.get('/slots/:slotId', getSlot, ({ slotId }) => slotId);

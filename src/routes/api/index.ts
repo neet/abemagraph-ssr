@@ -8,10 +8,13 @@ const router = Router();
 
 const apize = (method: 'get' | 'post') => <P, R, P1, P2>(path: string, func: (param?: P) => Promise<R>, transform?: (param: P1, query: P2) => P) => {
     router[method](path, (req, res, next) => {
-        func(transform ? transform(req.params, req.query): undefined)
+        func(transform ? transform(req.params, req.query) : undefined)
             .then(result => res.json(result))
             .catch(err => {
-                res.status(400).end();
+                if (err.expose)
+                    res.status(err.statusCode).end(err.message);
+                else
+                    res.status(400).end();
             });
     });
 };
