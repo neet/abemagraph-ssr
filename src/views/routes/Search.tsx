@@ -135,21 +135,21 @@ class Search extends React.Component<SearchProps, { query: string }> {
 }
 
 export default connect<ConnectedProps>({
-    query: state => state.search.query,
-    page: state => state.search.page,
-    hits: state => state.search.result ? state.search.result.hits.map(hit => {
-        const channel = state.app.channels.find(c => c.id === hit.channelId);
+    query: ({ search }) => search.query,
+    page: ({ search }) => search.page,
+    hits: ({ app, search }) => search.result ? search.result.hits.map(hit => {
+        const channel = app.channels.find(c => c.id === hit.channelId);
         return {
             ...hit,
             channelName: channel ? channel.name : hit.channelId
         };
     }) : [],
-    isSuccess: state => state.search.status === false && !!state.search.result,
-    hasResult: state => state.search.result ? state.search.result.hits.length > 0 : false,
-    hasMore: state => state.search.result ? (state.search.page + 1) * 50 < state.search.result.total : false,
-    isFailed: state => state.search.status !== false,
-    isFetching: state => !state.search.result && state.search.status === false,
-    totalPage: state => state.search.result ? Math.ceil(state.search.result.total / 50) : 0,
-    total: state => state.search.result ? state.search.result.total : 0,
-    took: state => state.search.result ? state.search.result.took : 0,
+    isSuccess: ({ search }) => search.status === false && !!search.result,
+    hasResult: ({ search }) => search.result ? search.result.hits.length > 0 : false,
+    hasMore: ({ search }) => search.result ? (search.page + 1) * 50 < search.result.total : false,
+    isFailed: ({ search }) => search.status !== false,
+    isFetching: ({ search }) => !search.result && search.status === false,
+    totalPage: ({ search }) => search.result ? Math.ceil(search.result.total / 50) : 0,
+    total: ({ search }) => search.result ? search.result.total : 0,
+    took: ({ search }) => search.result ? search.result.took : 0,
 })(pure(Search));
