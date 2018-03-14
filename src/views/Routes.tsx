@@ -10,6 +10,7 @@ import { NotFound } from './routes/NotFound';
 import Details from './routes/Details';
 import All from './routes/All';
 import { Redirect } from 'react-router';
+import Search from './routes/Search';
 
 export class Routes extends React.Component {
     render() {
@@ -21,6 +22,7 @@ export class Routes extends React.Component {
                         <Route path='/' exact component={Current} />
                         <Route path='/details/:slotId' exact component={Details} />
                         <Route path='/all/:date?' component={All} />
+                        <Route path='/search' component={Search} />
                         <Route component={NotFound} />
                     </Switch>
                     <Footer />
