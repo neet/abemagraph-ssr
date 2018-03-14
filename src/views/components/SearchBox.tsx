@@ -10,7 +10,7 @@ export class SearchBox extends React.Component<{
     channels: string[],
     search: string,
     onChange?: (search: string) => void,
-    onSearchClick?: (search?: string) => void
+    onSearchClick?: (search: string) => void
 }, { errors: string[] }> {
     constructor(props) {
         super(props);
