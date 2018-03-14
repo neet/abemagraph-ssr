@@ -57,15 +57,15 @@ export const search = async ({ query, page }: { query: string, page: number }) =
             post_tags: ['</mark>'],
             fields: {
                 'title': {
-                    fragment_size: 500,
+                    fragment_size: 100,
                     number_of_fragments: 1,
-                    no_match_size: 500,
+                    no_match_size: 100,
                     encoder: 'html'
                 },
                 'content': {
-                    fragment_size: 500,
+                    fragment_size: 100,
                     number_of_fragments: 1,
-                    no_match_size: 500,
+                    no_match_size: 100,
                     encoder: 'html',
                 },
                 'hashtag': {
