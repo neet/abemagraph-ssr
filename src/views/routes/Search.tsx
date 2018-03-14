@@ -112,7 +112,7 @@ class Search extends React.Component<SearchProps, { query: string }> {
                 {isFailed ? <div className='alert alert-danger'>エラーが発生しました</div> : null}
                 {isSuccess ? <>
                     {hasResult ? <>
-                        <p>検索結果: {total} 件 ({took / 1000} 秒)</p>
+                        <p>検索結果: {total} 件、{page * 50}から{Math.min((page + 1) * 50, total)}まで表示中 ({took / 1000} 秒)</p>
                         {hits.map(hit => <SearchListItem item={hit} />)}
                         <ul className='pager'>
                             <li>
