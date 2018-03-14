@@ -1,4 +1,4 @@
-import { BroadcastSlot, AllLogCompressed } from '../../types/abemagraph';
+import { BroadcastSlot, AllLogCompressed, SearchResult } from '../../types/abemagraph';
 import { Channel, Slot } from '../../types/abema';
 import { Moment } from 'moment';
 
@@ -16,14 +16,21 @@ export interface StoreApp {
 export interface StoreSlot {
     slot?: Slot;
     logs?: Array<[number, number, number]>;
-    isSlotFailed: boolean;
-    isLogsFailed: boolean;
+    slotStatus: false | number;
+    logsStatus: false | number;
 }
 
 export interface StoreAll {
-    isAllFailed: boolean;
+    allStatus: false | number;
     date: Moment;
     all: AllLogCompressed | undefined;
+}
+
+export interface StoreSearch {
+    status: false | number;
+    query: string;
+    page: number;
+    result?: SearchResult;
 }
 
 export interface Store {
@@ -31,4 +38,5 @@ export interface Store {
     broadcast: StoreBroadcast;
     slot: StoreSlot;
     all: StoreAll;
+    search: StoreSearch;
 }

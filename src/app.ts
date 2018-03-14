@@ -7,7 +7,7 @@ import 'moment/locale/ja';
 
 import Config from './config';
 import { downloadTimetable } from './collector/timetable';
-import { Collector } from './collector/index';
+import { collector } from './collector/index';
 import { Client } from 'elasticsearch';
 import { renderSSR } from './routes/react';
 import api from './routes/api';
@@ -18,13 +18,12 @@ import api from './routes/api';
     const es = new Client({ host: Config.elasticsearch.host });
     const cache = LRU(1000);
 
-    const collector = new Collector(db, es);
+    collector.initialize(db, es);
     await collector.loadTimetableFromFile();
     collector.startSchedule();
 
     const app = express();
     app.listen(Config.port);
-    app.set('collector', collector);
     app.set('cache', cache);
 
     app.use('/api', api);

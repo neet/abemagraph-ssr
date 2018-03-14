@@ -1,5 +1,6 @@
-config.*
+config.yml
 timetable.json
 node_modules/
-assets/
+assets/*
+!assets/favicon.ico
 bin/

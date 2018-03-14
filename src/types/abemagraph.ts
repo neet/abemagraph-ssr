@@ -1,3 +1,6 @@
+import * as moment from 'moment';
+import { SortType } from '../views/constant/const';
+
 export interface Log {
     log: {
         [time: string]: {
@@ -40,3 +43,46 @@ export type AllLog = Array<{
         }
     }
 }>;
+
+export type ESData = {
+    casts: string[],
+    channel: string,
+    content: string,
+    crews: string[],
+    end: string,
+    flags: string[],
+    group?: string,
+    hashtag?: string,
+    series: string,
+    start: string,
+    title: string
+};
+
+export interface ParsedQuery {
+    keyword: string;
+    channel: string[];
+    flag: string[];
+    sort?: SortType;
+    since?: [string, moment.Moment];
+    until?: [string, moment.Moment];
+    group: string[];
+    series: string[];
+}
+
+export interface SearchResultItem {
+    title: string;
+    channelId: string;
+    id: string;
+    content: string;
+    hashtag: string;
+    flags: string[];
+    start: string;
+    end: string;
+    score: number;
+}
+
+export interface SearchResult {
+    total: number;
+    took: number;
+    hits: SearchResultItem[];
+}

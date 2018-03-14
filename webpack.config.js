@@ -7,7 +7,7 @@ module.exports = {
     entry: {
         vendor: ['babel-polyfill', 'react', 'react-dom', 'react-router-dom',
             'jquery', 'redux', 'react-redux', 'recompose', 'moment', 'bootstrap',
-            'redux-actions', 'lodash-es', 'tslib', 'highcharts/highstock'],
+            'lodash-es', 'tslib', 'highcharts/highstock'],
         app: ['./src/views/index.tsx']
     },
     output: {

@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Switch } from 'react-router-dom';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
+import * as $ from 'jquery';
 
 import { Routes } from './Routes';
 import reducers from './reducers';
@@ -86,6 +87,7 @@ Highstock.setOptions({
     }
 });
 
+$(document).on('click', '.navbar-collapse a:not(.dropdown-toggle)', () => $('.navbar-toggle:visible').trigger('click'));
 hydrate((
     <Provider store={store}>
         <Router>

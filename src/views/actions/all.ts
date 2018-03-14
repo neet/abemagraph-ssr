@@ -1,18 +1,11 @@
-import { createAction } from 'redux-actions';
+import createActionFactory from 'typescript-fsa';
 import * as moment from 'moment';
 
 import { AllLogCompressed } from '../../types/abemagraph';
-import { TAction } from '../utils/connect';
-import { fetchAction } from '../utils/fetch-middleware';
-import { INVALIDATE_ALL } from '../constant/actions';
+import { fetchActionCreator } from '../utils/fetch-middleware';
 
-export const fetchAll = (date: moment.Moment = moment()) => fetchAction(`/api/all/${date.format('YYYYMMDD')}`, 'ALL');
+const createAction = createActionFactory();
 
-export type IReceiveAll = TAction<'FETCH_RECEIVED_ALL', AllLogCompressed>;
-export type IRequestAll = TAction<'FETCH_REQUEST_ALL', void>;
-export type IFailedFetchAll = TAction<'FETCH_FAILED_ALL', void>;
-
-export const invalidateAll = createAction(INVALIDATE_ALL);
-type IInvalidateAll = TAction<typeof INVALIDATE_ALL, void>;
-
-export type Actions = IReceiveAll | IRequestAll | IFailedFetchAll | IInvalidateAll;
+export const allApi = fetchActionCreator<AllLogCompressed>('ALL');
+export const fetchAll = (date: moment.Moment = moment()) => allApi.fetch(`/api/all/${date.format('YYYYMMDD')}`);
+export const invalidateAll = createAction('INVALIDATE_ALL');

@@ -1,8 +1,0 @@
-export const SET_SLOT = 'RECEIVE_SLOT';
-export const RECEIVE_SLOT = 'RECEIVE_SLOT';
-export const REQUEST_SLOT = 'REQUEST_SLOT';
-export const FAILED_FETCH_SLOT = 'FAILED_FETCH_SLOT';
-
-export const SET_CHANNELS = 'SET_CHANNELS';
-export const INVALIDATE_SLOT = 'UNSET_SLOT';
-export const INVALIDATE_ALL = 'INVALIDATE_ALL';
