@@ -127,7 +127,7 @@ class Search extends React.Component<SearchProps, { query: string }> {
                                 </button>
                             </li>
                         </ul>
-                    </> : <p>結果なし</p>}
+                    </> : <div className='alert alert-warning'>該当する番組がありません(キーワードのミスはありませんか？)</div>}
                 </> : null}
             </>
         );
