@@ -47,8 +47,8 @@ class Details extends React.Component<ReduxProps<{
         if (this.props.match.params.slotId !== slotId) {
             this.componentDidMount();
         }
-        if (this.props.slot !== slot && slot && slot.startAt < Date.now() / 1000) {
-            this.props.actions.slot.fetchSlotLogs(slot.id); // 普通にRouter
+        if (this.props.slot !== slot && this.props.slot && this.props.slot.startAt < Date.now() / 1000) {
+            this.props.actions.slot.fetchSlotLogs(this.props.slot.id); // 普通にRouter
         }
     }
     componentWillUnmount() {
