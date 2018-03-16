@@ -13,6 +13,7 @@ import { Store } from '../views/constant/store';
 import { getSlot } from './api/media';
 import { broadcast, broadcastChannels } from './api/broadcast';
 import { allLog } from './api/logs';
+import Config from '../config';
 
 const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Request, match: match<{}>) => Promise<Store> }> = [
     {
@@ -104,6 +105,7 @@ ${_.map(context.meta, (value, key) => `<meta property="${key}" content="${saniti
 <script src="/assets/manifest.js"></script>
 <script defer src="/assets/vendor.js"></script>
 <script defer src="/assets/app.js"></script>
+${Config.trackingCode}
 </body>
 </html>`;
     res.status(context.status);
