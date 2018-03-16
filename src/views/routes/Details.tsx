@@ -13,7 +13,7 @@ import * as _ from 'lodash';
 import { Loader } from '../components/Loader';
 import { EpisodeItem } from '../components/Episode';
 import { ErrorPage } from '../components/Error';
-import { Title, StatusCode } from '../components/RouterControl';
+import { Title, StatusCode, OgpMeta, TwitterMeta, SearchMeta } from '../components/RouterControl';
 import { Highcharts } from '../components/Highcharts';
 
 type Logs = { [time: number]: { view: number, comment: number } };
@@ -108,10 +108,13 @@ class Details extends React.Component<ReduxProps<{
             const isOnAir = this.state.now > slot.startAt && this.state.now < slot.endAt;
             const officialLink = `https://abema.tv/channels/${slot.channelId}/slots/${slot.id}`;
             const mark = [...Object.keys(slot.mark), ...Object.keys(slot.flags)];
-            const series = slot.programs[0] && slot.programs[0].series && slot.programs[0].series.id;
+            const firstPg = slot.programs[0];
+            if (!firstPg) return null;
+            const series = firstPg && firstPg.series && firstPg.series.id;
             const casts = _.uniq(_.flatMap(slot.programs, p => p.credit.casts || []));
             const crews = _.uniq(_.flatMap(slot.programs, p => p.credit.crews || []));
             const copyrights = _.uniq(_.flatMap(slot.programs, p => p.credit.copyrights || []));
+            const largeImage = `https://images.abemagraph.info/pg/${firstPg.id}/${firstPg.providedInfo.thumbImg}.w800.v${firstPg.providedInfo.updatedAt}.jpg`;
             return (
                 <>
                     <PageHeader text={(
@@ -121,6 +124,10 @@ class Details extends React.Component<ReduxProps<{
                         </>
                     )}>
                         <Title title={`${slot.title} - AbemaGraph`} />
+                        <OgpMeta title={slot.title} type='video' image={largeImage} />
+                        <TwitterMeta title={slot.title} card='summary_large_image'
+                            label1='チャンネル' data1={channel.name} image={largeImage} />
+                        <SearchMeta title={slot.title} description={slot.content} />
                         <div className='pull-right'>
                             {now > 0 && now > slot.startAt ? (
                                 isOnAir ?
