@@ -15,7 +15,9 @@ import Search from './routes/Search';
 export class Routes extends React.Component<RouteComponentProps<{}>> {
     componentDidUpdate(prevProps: RouteComponentProps<{}>) {
         if (this.props.location !== prevProps.location) {
-            window.dispatchEvent(new CustomEvent('locationchanged'));
+            const event = document.createEvent('CustomEvent');
+            event.initCustomEvent('eventName', false, false, {});
+            window.dispatchEvent(event);
         }
     }
     render() {
