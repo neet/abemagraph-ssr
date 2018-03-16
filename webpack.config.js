@@ -2,8 +2,10 @@ const webpack = require('webpack');
 const path = require('path');
 const poststylus = require('poststylus');
 const ExtractTestPlugin = require('extract-text-webpack-plugin');
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
-module.exports = {
+const isProduction = process.env.NODE_ENV === 'production';
+const config = {
     entry: {
         vendor: ['babel-polyfill', 'react', 'react-dom', 'react-router-dom',
             'jquery', 'redux', 'react-redux', 'recompose', 'moment', 'bootstrap',
@@ -14,7 +16,7 @@ module.exports = {
         filename: '[name].js',
         path: path.resolve(__dirname, 'assets')
     },
-    devtool: 'source-map',
+
     module: {
         rules: [
             {
@@ -58,14 +60,20 @@ module.exports = {
         ]
     },
     plugins: [
-        new webpack.NamedModulesPlugin(),
-        new webpack.NoEmitOnErrorsPlugin(),
         new webpack.LoaderOptionsPlugin({
             stylus: {
                 use: poststylus(['autoprefixer'])
             }
         }),
         new ExtractTestPlugin('app.css'),
+        new webpack.ProvidePlugin({
+            $: 'jquery',
+            jQuery: 'jquery'
+        }),
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify('production')
+        }),
+        new UglifyJSPlugin(),
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendor',
             minChunks: Infinity
@@ -74,13 +82,40 @@ module.exports = {
             name: 'manifest',
             minChunks: Infinity,
         }),
-        new webpack.ProvidePlugin({
-            $: 'jquery',
-            jQuery: 'jquery'
-        })
+        new webpack.optimize.OccurrenceOrderPlugin()
     ],
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
         alias: { 'lodash': 'lodash-es' }
     }
 };
+
+if (!isProduction) {
+    config.plugins = [
+        new webpack.NamedModulesPlugin(),
+        new webpack.NoEmitOnErrorsPlugin(),
+        new webpack.LoaderOptionsPlugin({
+            stylus: {
+                use: poststylus(['autoprefixer'])
+            }
+        }),
+        new webpack.ProvidePlugin({
+            $: 'jquery',
+            jQuery: 'jquery'
+        }),
+        new ExtractTestPlugin('app.css'),
+        new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify('production')
+        }),
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            minChunks: Infinity
+        }),
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'manifest',
+            minChunks: Infinity,
+        })
+    ];
+    config.devtool = 'source-map';
+}
+module.exports = config;
