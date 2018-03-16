@@ -29,10 +29,10 @@ export const downloadTimetable = async (): Promise<Timetable> => {
                 slots[schedules.channelId][slot.id] = slot;
         }
     }
-    timetable.channelSchedules = Object.keys(slots).map(channelId => ({
+    timetable.channelSchedules = _.map(slots, (chSlots, channelId) => ({
         channelId,
         date: moment().format('YYYYMMDD'),
-        slots: Object.keys(slots[channelId]).map(slotId => slots[channelId][slotId])
+        slots: Object.values(chSlots)
     }));
 
     const totalSlots = Object.keys(slots).reduce((count, channelId) => count + Object.keys(slots[channelId]).length, 0);

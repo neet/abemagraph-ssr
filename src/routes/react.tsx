@@ -13,6 +13,7 @@ import { Store } from '../views/constant/store';
 import { getSlot } from './api/media';
 import { broadcast, broadcastChannels } from './api/broadcast';
 import { allLog } from './api/logs';
+import Config from '../config';
 
 const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Request, match: match<{}>) => Promise<Store> }> = [
     {
@@ -57,6 +58,7 @@ const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Re
     },
 ];
 
+const sanitize = str => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 export const renderSSR = async (req: Request, res: Response) => {
     res.contentType('text/html');
 
@@ -70,9 +72,10 @@ export const renderSSR = async (req: Request, res: Response) => {
         }
     }));
     const store = createStore(reducers, initialState);
-    const context: { url?: string, status: number, title: string } = {
+    const context: { url?: string, status: number, title: string, meta: { [key: string]: string } } = {
         status: 200,
-        title: 'AbemaGraph'
+        title: 'AbemaGraph',
+        meta: {}
     };
     const appMarkup = renderToStaticMarkup(
         <Provider store={store}>
@@ -91,6 +94,7 @@ export const renderSSR = async (req: Request, res: Response) => {
 <meta charset="UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+${_.map(context.meta, (value, key) => `<meta property="${key}" content="${sanitize(value)}" />`).join('')}
 <title>${context.title}</title>
 <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon" />
 <link href="/assets/app.css" rel="stylesheet" />
@@ -101,6 +105,7 @@ export const renderSSR = async (req: Request, res: Response) => {
 <script src="/assets/manifest.js"></script>
 <script defer src="/assets/vendor.js"></script>
 <script defer src="/assets/app.js"></script>
+${Config.trackingCode}
 </body>
 </html>`;
     res.status(context.status);

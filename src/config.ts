@@ -23,6 +23,7 @@ interface Config {
         timetable: string;
     };
     logger: Configuration;
+    trackingCode: string;
 }
 
 const config = (() => safeLoad(readFileSync('./config.yml', { encoding: 'utf8' })))() as Config;

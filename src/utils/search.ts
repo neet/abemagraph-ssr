@@ -28,14 +28,14 @@ export function validateAndParseSearch(query: string): [string[], ParsedQuery] {
         if (parsed.sort) {
             if (typeof parsed.sort !== 'string') {
                 errors.push('ソート指定は一種類のみです');
-            } else if (!Object.keys(sortType).includes(parsed.sort)) {
+            } else if (!sortType[parsed.sort]) {
                 errors.push(`ソート種別が不正です: ${parsed.sort}`);
             } else {
                 search.sort = parsed.sort as SortType;
             }
         }
         const flags = _.flatMap([parsed.flag || []], m => m as string);
-        search.flag = flags.filter(flag => Object.keys(markName).includes(flag));
+        search.flag = flags.filter(flag => !!markName[flag]);
         if (search.flag.length !== flags.length) {
             errors.push(`不正なフラグがあります: ${flags.filter(flag => !search.flag.includes(flag)).join(',')}`);
         }
