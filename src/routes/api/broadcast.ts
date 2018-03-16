@@ -7,7 +7,7 @@ import { collector } from '../../collector';
 import { Channel } from '../../types/abema';
 import { api } from './index';
 
-export const broadcast = async (): Promise<BroadcastSlot[]> => {
+export const broadcast = api.get('/broadcast', async (): Promise<BroadcastSlot[]> => {
     const slots = collector.currentSlots;
     const logs = await collector.findLogs(...slots.map(s => s.id));
     const lastLogs: { [slot: string]: Stats } = Object.keys(logs).reduce((obj, key) => {
@@ -36,14 +36,12 @@ export const broadcast = async (): Promise<BroadcastSlot[]> => {
         ],
         stats: lastLogs[slot.id] || null
     }));
-};
-api.get('/broadcast', broadcast);
+}, undefined, 60);
 
-export const broadcastChannels = async (): Promise<Channel[]> => {
+export const broadcastChannels = api.get('/broadcast/channels', async (): Promise<Channel[]> => {
     const channels = collector.channels;
     if (channels)
         return channels.map(channel => ({ id: channel.id, name: channel.name.replace(/チャンネル$/, ''), order: channel.order })) || [];
     else
         throw new ServiceUnavailable('No channels, server did not start correctly');
-};
-api.get('/broadcast/channels', broadcastChannels);
+});

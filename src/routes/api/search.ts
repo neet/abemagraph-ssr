@@ -6,7 +6,7 @@ import { validateAndParseSearch } from '../../utils/search';
 import { collector } from '../../collector';
 import { api } from './index';
 
-export const search = async ({ query, page }: { query: string, page: number }) => {
+export const search = api.get('/search', async ({ query, page }: { query: string, page: number }) => {
     if (typeof query !== 'string' || query.length > 1024 || query.trim().length <= 0)
         throw new BadRequest('Query missed or too long');
     const [errors, queryParsed] = validateAndParseSearch(query);
@@ -96,9 +96,8 @@ export const search = async ({ query, page }: { query: string, page: number }) =
             score: item._score
         }))
     };
-};
-api.get('/search', search, (param, { q: query, page: p }) => {
+}, (param, { q: query, page: p }) => {
     const page = p ? Number(p) : 0;
     if (isNaN(page)) throw new BadRequest('Page must be number');
     return { query, page };
-});
+}, 0);
