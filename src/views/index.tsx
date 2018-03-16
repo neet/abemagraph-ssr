@@ -10,7 +10,7 @@ import { Routes } from './Routes';
 import reducers from './reducers';
 
 import 'moment/locale/ja';
-
+import 'whatwg-fetch';
 import 'jquery';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
