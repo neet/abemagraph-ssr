@@ -3,4 +3,5 @@ timetable.json
 node_modules/
 assets/*
 !assets/favicon.ico
+!assets/*.png
 bin/
