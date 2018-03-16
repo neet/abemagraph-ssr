@@ -5,6 +5,7 @@ import { Glyphicon } from './Glyphicon';
 import { markLongName, MarkType, markName, SortType, sortType } from '../constant/const';
 import { ParsedQuery } from '../../types/abemagraph';
 import { validateAndParseSearch } from '../../utils/search';
+import { classname } from '../utils/classname';
 
 export class SearchBox extends React.Component<{
     channels: string[],
@@ -57,7 +58,7 @@ export class SearchBox extends React.Component<{
         const { errors } = this.state;
         return (
             <form className='form-inline' onSubmit={e => this.onSubmit(e)}>
-                <div className={['input-group'].concat(errors.length !== 0 ? ['has-error'] : []).join(' ')}>
+                <div className={classname({ 'input-group': true, 'has-error': errors.length !== 0 })}>
                     <input type='text' name='q' className='form-control' size={80}
                         placeholder='channel:anime24 until:now' value={this.props.search}
                         onChange={e => this.onChange(e)} />
