@@ -55,7 +55,7 @@ class Details extends React.Component<ReduxProps<{
         this.props.actions.slot.invalidateSlot();
     }
     private createGraphConfig(type: 'comment' | 'view', logs: Logs, { startAt, endAt }: { startAt: number, endAt: number }) {
-        const logsData = Object.keys(logs).map(v => [Number(v) * 1000, logs[v][type]]) as Array<[number, number]>;
+        const logsData = _.map(logs, (log, v) => [Number(v) * 1000, log[v]]) as Array<[number, number]>;
         const perMinLogs = logsData.map((v, i, a) => i === 0 ? (v[0] - startAt * 1000 > 30 * 1000 ? [v[0], Math.floor((v[1] || 0) / (v[0] - startAt * 1000) * 60 * 1000)] : [v[0], 0]) : [v[0], Math.floor((v[1] - a[i - 1][1]) / (a[i][0] - a[i - 1][0]) * 60 * 1000)]) as Array<[number, number]>;
         const title = type === 'comment' ? 'コメント数' : '閲覧数';
         return {
