@@ -5,7 +5,7 @@ import { NotFound, BadRequest } from 'http-errors';
 import { collector } from '../../collector';
 import { api } from './index';
 
-export const slotLog = async (slotId: string): Promise<number[][] | null> => {
+export const slotLog = api.get('/logs/:slotId', async (slotId: string): Promise<number[][] | null> => {
     const slots = await collector.findSlot(slotId);
     if (slots.length !== 1) throw new NotFound('Slot not found');
     const log = await collector.logsDb.findOne({ _id: slotId });
@@ -16,10 +16,9 @@ export const slotLog = async (slotId: string): Promise<number[][] | null> => {
     } else {
         throw new NotFound('Log not found');
     }
-};
-api.get('/logs/:slotId', slotLog, ({ slotId }) => slotId);
+}, ({ slotId }) => slotId, 15);
 
-export const allLog = async (date: string) => {
+export const allLog = api.get('/all/:date', async (date: string) => {
     if (!date.match(/^\d{8}$/)) throw new BadRequest('Invalid date');
     const allCursor = await collector.allDb.find({ date });
     if (await allCursor.hasNext()) {
@@ -42,5 +41,4 @@ export const allLog = async (date: string) => {
     } else {
         throw new NotFound('No log items');
     }
-};
-api.get('/all/:date', allLog, ({ date }) => date);
+}, ({ date }) => date, 15);
