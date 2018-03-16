@@ -28,7 +28,11 @@ const config = {
                         'babelOptions': {
                             'babelrc': false,
                             'presets': [
-                                ['es2015']
+                                ["env", {
+                                    targets: {
+                                        browsers: ["last 2 versions", "ie >= 10"]
+                                    }
+                                }]
                             ]
                         }
                     }
