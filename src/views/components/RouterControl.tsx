@@ -26,7 +26,7 @@ export const Meta = ({ property, content }) => (
         return null;
     }} />
 );
-export const KeyValueMeta = ({ prefix, ...params }) => <>{_.map(params, (value, key) => <Meta property={prefix + key} content={value} />)}</>;
+export const KeyValueMeta = ({ prefix, ...params }) => <>{_.map(params, (value, key) => <Meta key={key} property={prefix + key} content={value} />)}</>;
 export const OgpMeta = ({ ...params }) => <KeyValueMeta prefix='ogp:' {...params} />;
 export const SearchMeta = ({ ...params }) => <KeyValueMeta prefix='' {...params} />;
 export const TwitterMeta = ({ ...params }) => <KeyValueMeta prefix='twitter:' {...params} />;

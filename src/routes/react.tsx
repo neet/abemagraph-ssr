@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { Request, Response } from 'express';
-import { StaticRouter, RouteProps, match, matchPath } from 'react-router-dom';
+import { StaticRouter, RouteProps, match, matchPath, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import * as _ from 'lodash';
@@ -80,7 +80,7 @@ export const renderSSR = async (req: Request, res: Response) => {
     const appMarkup = renderToStaticMarkup(
         <Provider store={store}>
             <StaticRouter location={req.url} context={context}>
-                <Routes />
+                <Route component={Routes} />
             </StaticRouter>
         </Provider>
     );

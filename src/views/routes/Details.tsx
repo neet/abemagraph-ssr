@@ -43,7 +43,7 @@ class Details extends React.Component<ReduxProps<{
         }
         this.setState({ now });
     }
-    componentWillReceiveProps({ match: { params: { slotId } }, slot }: RouteComponentProps<{ slotId: string }> & { slot?: Slot }) {
+    componentDidUpdate({ match: { params: { slotId } }, slot }: RouteComponentProps<{ slotId: string }> & { slot?: Slot }) {
         if (this.props.match.params.slotId !== slotId) {
             this.componentDidMount();
         }

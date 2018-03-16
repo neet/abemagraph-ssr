@@ -71,7 +71,7 @@ const config = {
             jQuery: 'jquery'
         }),
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify('production')
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
         }),
         new UglifyJSPlugin(),
         new webpack.optimize.CommonsChunkPlugin({
@@ -105,7 +105,7 @@ if (!isProduction) {
         }),
         new ExtractTestPlugin('app.css'),
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': JSON.stringify('production')
+            'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
         }),
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendor',
