@@ -9,10 +9,15 @@ import { Container } from './components/Container';
 import { NotFound } from './routes/NotFound';
 import Details from './routes/Details';
 import All from './routes/All';
-import { Redirect } from 'react-router';
+import { Redirect, RouteComponentProps } from 'react-router';
 import Search from './routes/Search';
 
-export class Routes extends React.Component {
+export class Routes extends React.Component<RouteComponentProps<{}>> {
+    componentDidUpdate(prevProps: RouteComponentProps<{}>) {
+        if (this.props.location !== prevProps.location) {
+            window.dispatchEvent(new CustomEvent('locationchanged'));
+        }
+    }
     render() {
         return (
             <React.Fragment>

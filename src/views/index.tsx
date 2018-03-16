@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { hydrate } from 'react-dom';
-import { BrowserRouter as Router, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
@@ -91,7 +91,7 @@ $(document).on('click', '.navbar-collapse a:not(.dropdown-toggle)', () => $('.na
 hydrate((
     <Provider store={store}>
         <Router>
-            <Routes />
+            <Route component={Routes} />
         </Router>
     </Provider>
 ), document.getElementById('app'));
