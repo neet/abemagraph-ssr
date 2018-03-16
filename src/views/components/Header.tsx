@@ -28,8 +28,8 @@ export const Header = () => (
                                 <span className='caret' />
                             </a>
                             <ul className='dropdown-menu'>
-                                <NavLink to='/notification'><Glyphicon glyph='bell' /> 通知</NavLink>
-                                <NavLink to='/timetable'><Glyphicon glyph='calendar' /> 番組表</NavLink>
+                                <NavLink to='/notification' disabled><Glyphicon glyph='bell' /> 通知</NavLink>
+                                <li><a href='/timetable'><Glyphicon glyph='calendar' /> 番組表</a></li>
                                 <li className='divider' role='separator' />
                                 <NavLink to='/search'><Glyphicon glyph='search' /> 検索</NavLink>
                             </ul>
