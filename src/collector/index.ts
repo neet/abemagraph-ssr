@@ -26,7 +26,7 @@ class Collector {
     private cancelPromise: Promise<void> | null = null;
     private cancel: Function | null = null;
     private promises: Array<Promise<void>> = [];
-    
+
     initialize(db: Db, es: Client) {
         this.db = db;
         this.es = es;
@@ -93,8 +93,8 @@ class Collector {
             if (pastLogs[audience.slotId] && Object.keys(pastLogs[audience.slotId].log).length >= 2) {
                 const past = pastLogs[audience.slotId];
                 const lastKey = Object.keys(past.log).map(v => Number(v)).sort((a, b) => b - a)[0];
-                const commentInc = Math.floor((audience.commentCount - past.log[`${lastKey}`].c) / (now - lastKey) * 60);
-                const viewInc = Math.floor((audience.viewCount - past.log[`${lastKey}`].v) / (now - lastKey) * 60);
+                const commentInc = Math.floor(((audience.commentCount || 0) - past.log[`${lastKey}`].c) / (now - lastKey) * 60);
+                const viewInc = Math.floor(((audience.viewCount || 0) - past.log[`${lastKey}`].v) / (now - lastKey) * 60);
                 if (commentInc > 0 && viewInc > 0) {
                     all.ch[audience.channelId] = [commentInc, viewInc];
                     all.c += commentInc;
@@ -113,8 +113,8 @@ class Collector {
             await this.logsDb.updateOne({ _id: audience.slotId }, {
                 '$set': {
                     [`log.${now}`]: {
-                        c: audience.commentCount,
-                        v: audience.viewCount
+                        c: audience.commentCount || 0,
+                        v: audience.viewCount || 0
                     }
                 }
             }, { upsert: true });

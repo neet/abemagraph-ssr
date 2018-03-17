@@ -109,8 +109,8 @@ export interface Timetable {
 export interface SlotAudienceItem {
     slotId: string;
     channelId: string;
-    viewCount: number;
-    commentCount: number;
+    viewCount?: number;
+    commentCount?: number;
 }
 
 export interface SlotAudience {
