@@ -2,7 +2,7 @@
   "name": "abemagraph-ssr",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "dependencies": {
     "async-file": "^2.0.2",
     "babel-polyfill": "^6.26.0",
