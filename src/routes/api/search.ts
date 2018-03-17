@@ -6,6 +6,7 @@ import { validateAndParseSearch } from '../../utils/search';
 import { collector } from '../../collector';
 import { api } from './index';
 
+const stripHighlight = str => str.replace(/<\/mark><mark>/g, '');
 export const search = api.get('/search', async ({ query, page }: { query: string, page: number }) => {
     if (typeof query !== 'string' || query.length > 1024 || query.trim().length <= 0)
         throw new BadRequest('Query missed or too long');
@@ -53,7 +54,7 @@ export const search = api.get('/search', async ({ query, page }: { query: string
         size: 50,
         from: page * 50,
         highlight: {
-            pre_tags: ['<mark search>'],
+            pre_tags: ['<mark>'],
             post_tags: ['</mark>'],
             fields: {
                 'title': {
@@ -85,11 +86,11 @@ export const search = api.get('/search', async ({ query, page }: { query: string
         total: esResult.hits.total,
         took: esResult.took,
         hits: esResult.hits.hits.map(item => ({
-            title: item.highlight.title ? item.highlight.title[0] : item._source.title,
+            title: item.highlight.title ? stripHighlight(item.highlight.title[0]) : item._source.title,
             channelId: item._source.channel,
             id: item._id,
-            content: item.highlight.content ? item.highlight.content[0] : item._source.content,
-            hashtag: item.highlight.hashtag ? item.highlight.hashtag[0] : item._source.hashtag,
+            content: item.highlight.content ? stripHighlight(item.highlight.content[0]) : item._source.content,
+            hashtag: item.highlight.hashtag ? stripHighlight(item.highlight.hashtag[0]) : item._source.hashtag,
             flags: item._source.flags,
             start: moment(item._source.start),
             end: moment(item._source.end),
