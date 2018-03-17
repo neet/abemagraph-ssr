@@ -129,7 +129,7 @@ class All extends React.Component<Props, { isMounted: boolean }>{
                                 timeFormat={false}
                                 isValidDate={current => current.isBefore(today)}
                                 defaultValue={date}
-                                onChange={nextDate => this.props.history.push(`/all/${(nextDate as moment.Moment).format('YYYYMMDD')}`)} /> : null}
+                                onChange={nextDate => typeof nextDate === 'object' && this.props.history.push(`/all/${(nextDate as moment.Moment).format('YYYYMMDD')}`)} /> : null}
                         </div>
                     </PageHeader>
                     <p>該当する情報を発見できませんでした。別の日時をお試しください</p>
@@ -149,7 +149,7 @@ class All extends React.Component<Props, { isMounted: boolean }>{
                             timeFormat={false}
                             isValidDate={current => current.isBefore(today)}
                             defaultValue={date}
-                            onChange={nextDate => this.props.history.push(`/all/${(nextDate as moment.Moment).format('YYYYMMDD')}`)} /> : null}
+                            onChange={nextDate => typeof nextDate === 'object' && this.props.history.push(`/all/${(nextDate as moment.Moment).format('YYYYMMDD')}`)} /> : null}
                     </div>
                 </PageHeader>
                 <PageHeader mini text={<><Glyphicon glyph='comment' /> コメントの増加</>} />
