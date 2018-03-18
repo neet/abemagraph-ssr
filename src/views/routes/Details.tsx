@@ -32,9 +32,6 @@ class Details extends React.Component<ReduxProps<{
     componentDidMount() {
         const { slot, channel, match: { params: { slotId } } } = this.props;
         const now = Date.now() / 1000;
-        if (slot && !channel) {
-            this.props.actions.app.fetchChannels();
-        }
         if ((!slot && slotId) || (slot && slotId !== slot.id)) {
             this.props.actions.slot.fetchSlot(slotId);
         }
@@ -44,11 +41,14 @@ class Details extends React.Component<ReduxProps<{
         this.setState({ now });
     }
     componentDidUpdate({ match: { params: { slotId } }, slot }: RouteComponentProps<{ slotId: string }> & { slot?: Slot }) {
+        const now = Date.now() / 1000;
         if (this.props.match.params.slotId !== slotId) {
-            this.componentDidMount();
+            this.props.actions.slot.fetchSlot(this.props.match.params.slotId);
         }
-        if (this.props.slot !== slot && this.props.slot && this.props.slot.startAt < Date.now() / 1000) {
-            this.props.actions.slot.fetchSlotLogs(this.props.slot.id); // 普通にRouter
+        if (this.props.slot !== slot && this.props.slot) {
+            if (this.props.slot.startAt < now) {
+                this.props.actions.slot.fetchSlotLogs(this.props.slot.id);
+            }
         }
     }
     componentWillUnmount() {
@@ -102,7 +102,7 @@ class Details extends React.Component<ReduxProps<{
         if (this.props.slotStatus) {
             return <><ErrorPage code={this.props.slotStatus} /><StatusCode code={404} /></>;
         }
-        if (slot && channel) {
+        if (slot) {
             const elapsedSec = this.state.now - slot.startAt;
             const isEnd = slot.endAt < this.state.now;
             const isOnAir = this.state.now > slot.startAt && this.state.now < slot.endAt;
@@ -126,7 +126,7 @@ class Details extends React.Component<ReduxProps<{
                         <Title title={`${slot.title} - AbemaGraph`} />
                         <OgpMeta title={slot.title} type='video' image={largeImage} />
                         <TwitterMeta title={slot.title} card='summary_large_image'
-                            label1='チャンネル' data1={channel.name} image={largeImage} />
+                            label1='チャンネル' data1={channel ? channel.name : slot.channelId} image={largeImage} />
                         <SearchMeta title={slot.title} description={slot.content} />
                         <div className='pull-right'>
                             {now > 0 && now > slot.startAt ? (
@@ -154,7 +154,7 @@ class Details extends React.Component<ReduxProps<{
                         </dd>
                         <dt>チャンネル</dt>
                         <dd>
-                            <Link to={`/search?q=channel:${channel.id}+since:now`}>{channel.name} ({channel.id})</Link>
+                            <Link to={`/search?q=channel:${slot.channelId}+since:now`}>{channel ? `${channel.name} (${channel.id})` : slot.channelId}</Link>
                         </dd>
                         <dt><Glyphicon glyph='calendar' /> 放送日時</dt>
                         <dd>
