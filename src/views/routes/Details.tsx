@@ -17,14 +17,15 @@ import { Title, StatusCode, OgpMeta, TwitterMeta, SearchMeta } from '../componen
 import { Highcharts } from '../components/Highcharts';
 
 type Logs = { [time: number]: { view: number, comment: number } };
-class Details extends React.Component<ReduxProps<{
+type ConnectedProps = {
     slot?: Slot,
     channel?: Channel,
     slotStatus: false | number,
     logsStatus: false | number,
     logs?: Logs,
     logsUpdated: number
-}> & RouteComponentProps<{ slotId: string }>, { now: number }> {
+};
+class Details extends React.Component<ReduxProps<ConnectedProps> & RouteComponentProps<{ slotId: string }>, { now: number }> {
     constructor(props) {
         super(props);
         this.state = { now: 0 };
@@ -223,7 +224,7 @@ class Details extends React.Component<ReduxProps<{
     }
 }
 
-export default connect<{ slot?: Slot, channel?: Channel, slotStatus: false | number, logsStatus: false | number, logs?: Logs, logsUpdated: number }>({
+export default connect<ConnectedProps>({
     slot: state => state.slot.slot,
     channel: ({ app: { channels }, slot: { slot } }) => slot ? channels.find(ch => ch.id === slot.channelId) : undefined,
     slotStatus: state => state.slot.slotStatus,

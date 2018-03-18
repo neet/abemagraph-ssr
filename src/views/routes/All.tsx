@@ -14,15 +14,15 @@ import { ErrorPage } from '../components/Error';
 import { Highcharts, Highstock } from '../components/Highcharts';
 import * as Datetime from 'react-datetime';
 
-type Props = ReduxProps<{
+type ConnectedProps = {
     date: moment.Moment,
     log?: AllLog,
     isFailed: boolean,
     channels: Channel[],
     logChannels: string[],
     failedCode: number
-}> & RouteComponentProps<{ date: string }>;
-class All extends React.Component<Props, { isMounted: boolean }>{
+};
+class All extends React.Component<ReduxProps<ConnectedProps> & RouteComponentProps<{ date: string }>, { isMounted: boolean }>{
     constructor(props) {
         super(props);
         this.state = { isMounted: false };
@@ -39,7 +39,7 @@ class All extends React.Component<Props, { isMounted: boolean }>{
         if (date) this.props.actions.all.fetchAll(date);
     }
 
-    componentDidUpdate(prevProps: Props) {
+    componentDidUpdate(prevProps: RouteComponentProps<{ date: string }>) {
         if (prevProps.match.params !== this.props.match.params) {
             this.props.actions.all.invalidateAll();
             this.componentDidMount();
@@ -165,7 +165,7 @@ class All extends React.Component<Props, { isMounted: boolean }>{
     }
 }
 
-export default connect<{ date: moment.Moment, log?: AllLog, isFailed: boolean, failedCode: number, channels: Channel[], logChannels: string[] }>({
+export default connect<ConnectedProps>({
     date: state => typeof state.all.date === 'string' ? moment(state.all.date) : state.all.date,
     log: state => {
         if (!state.all.all) return undefined;

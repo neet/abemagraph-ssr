@@ -16,13 +16,14 @@ import { Loader } from '../components/Loader';
 import { ErrorPage } from '../components/Error';
 
 type Sort = 'v' | 'c' | 'vpm' | 'cpm' | 'ch';
-class Current extends React.Component<ReduxProps<{
+type ConnectedProps = {
     slots: BroadcastSlot[],
     updated: number,
     channels: Channel[],
     isFetching: boolean,
     isFailed: boolean
-}> & RouteComponentProps<{}>, { mounted: boolean, sortBy: Sort }>{
+};
+class Current extends React.Component<ReduxProps<ConnectedProps> & RouteComponentProps<{}>, { mounted: boolean, sortBy: Sort }>{
     constructor(props) {
         super(props);
         this.state = { mounted: false, sortBy: 'vpm' };
@@ -142,7 +143,7 @@ class Current extends React.Component<ReduxProps<{
     }
 }
 
-export default connect<{ slots: BroadcastSlot[], updated: number, channels: Channel[], isFetching: boolean, isFailed: boolean }>({
+export default connect<ConnectedProps>({
     slots: state => state.broadcast.slots,
     updated: state => state.broadcast.updated,
     channels: state => state.app.channels,
