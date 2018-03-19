@@ -40,7 +40,12 @@ export const downloadTimetable = async (): Promise<Timetable> => {
     return timetable;
 };
 
-export const normalizePerson = (str: string) => str.replace(/^.*[:：]/, '').replace(/[\(【].*[\)】]/g, '').replace(/\s/g, '');
+export const normalizePerson = (arr: string[]) =>
+    _.chain(arr).flatMap(str => str.split(/[／\/]/))
+        .flatMap(str => str.split(/[、,・]/))
+        .map(str => str.replace(/^.*[:：]/, '').replace(/[\(【].*[\)】]/g, '').replace(/\s/g, ''))
+        .filter(str => !str.match(/(その)?他$/))
+        .value();
 
 export const convertSlotToES = (slot: Slot) => ({
     channel: slot.channelId,
@@ -52,8 +57,8 @@ export const convertSlotToES = (slot: Slot) => ({
     hashtag: slot.hashtag || '',
     flags: [...Object.keys(slot.flags), ...Object.keys(slot.mark)],
     group: slot.slotGroup ? slot.slotGroup.id : '',
-    crews: (slot.programs[0].credit.crews || []).map(normalizePerson).filter(str => !str.match(/(他|ほか)/)),
-    casts: (slot.programs[0].credit.casts || []).map(normalizePerson).filter(str => !str.match(/(他|ほか)/))
+    crews: normalizePerson(slot.programs[0].credit.crews || []),
+    casts: normalizePerson(slot.programs[0].credit.casts || [])
 });
 
 export const storeTimetableToES = async (es: Client, slots: Slot[]) => {
