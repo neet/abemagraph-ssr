@@ -139,7 +139,7 @@ class Details extends React.Component<ReduxProps<ConnectedProps> & RouteComponen
                                     ) : slot.flags.timeshift ? (
                                         slot.timeshiftEndAt < now ?
                                             (<button className='btn btn-info' disabled>放送終了(TS期限切れ)</button>)
-                                            : (slot.flags.timeshiftFree && slot.timeshiftFreeEndAt > now ?
+                                            : (slot.flags.timeshiftFree && slot.timeshiftFreeEndAt && slot.timeshiftFreeEndAt > now ?
                                                 <a href={officialLink} className='btn btn-primary'>無料タイムシフト</a> :
                                                 <a href={officialLink} className='btn btn-info'>タイムシフト</a>
                                             )
@@ -177,7 +177,7 @@ class Details extends React.Component<ReduxProps<ConnectedProps> & RouteComponen
                         </>) : null}
                         <dt><Glyphicon glyph='time' /> タイムシフト</dt>
                         <dd>{slot.flags.timeshift ?
-                            slot.flags.timeshiftFree && slot.timeshiftFreeEndAt > now ?
+                            slot.flags.timeshiftFree && slot.timeshiftFreeEndAt && slot.timeshiftFreeEndAt > now ?
                                 (now > 0 ? `無料 - ${moment.unix(slot.timeshiftFreeEndAt || slot.timeshiftEndAt).format('MM/DD(ddd) HH:mm')}まで` : '無料') :
                                 (now > 0 ? `プレミアム - ${moment.unix(slot.timeshiftEndAt).format('MM/DD(ddd) HH:mm')}まで` : 'プレミアム') : 'なし'}</dd>
                         {slot.startAt < now2 ? <>
