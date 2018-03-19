@@ -42,7 +42,7 @@ export const downloadTimetable = async (): Promise<Timetable> => {
 
 export const normalizePerson = (arr: string[]) =>
     _.chain(arr).flatMap(str => str.split(/[／\/]/))
-        .flatMap(str => str.split(/[、,・]/))
+        .flatMap(str => str.split(/[、,]/))
         .map(str => str.replace(/^.*[:：]/, '').replace(/[\(【].*[\)】]/g, '').replace(/\s/g, ''))
         .filter(str => !str.match(/(その)?他$/))
         .value();
