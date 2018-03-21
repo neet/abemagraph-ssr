@@ -14,6 +14,7 @@ import { getSlot } from './api/media';
 import { broadcast, broadcastChannels } from './api/broadcast';
 import { allLog } from './api/logs';
 import Config from '../config';
+import { search } from './api/search';
 
 const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Request, match: match<{}>) => Promise<Store> }> = [
     {
@@ -56,14 +57,33 @@ const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Re
             });
         }
     },
+    {
+        path: '/search',
+        fetchInitialState: async (state: Store, req: Request) => {
+            if (typeof req.query.q === 'string') {
+                const page = Number(req.query.page || '');
+                const result = await search({ query: req.query.q, page: isNaN(page) ? 0 : page });
+                return _.merge(state, {
+                    search: {
+                        result,
+                        page,
+                        query: req.query.q,
+                        status: false
+                    }
+                });
+            }
+            return state;
+        }
+    }
 ];
 
 const sanitize = str => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 export const renderSSR = async (req: Request, res: Response) => {
     res.contentType('text/html');
 
+    const url = req.url.replace(/\?.+$/, '');
     const initialState = await routeInfo.reduce((prom, route) => {
-        const m = matchPath(req.url, route);
+        const m = matchPath(url, route);
         return prom.then((state: Store) => m && route.fetchInitialState ?
             route.fetchInitialState(state, req, m).catch(() => state) : Promise.resolve(state));
     }, Promise.resolve({
