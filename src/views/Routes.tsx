@@ -11,6 +11,7 @@ import Details from './routes/Details';
 import All from './routes/All';
 import { Redirect, RouteComponentProps } from 'react-router';
 import Search from './routes/Search';
+import { TwitterMeta, OgpMeta } from './components/RouterControl';
 
 export class Routes extends React.Component<RouteComponentProps<{}>> {
     componentDidUpdate(prevProps: RouteComponentProps<{}>) {
@@ -28,6 +29,8 @@ export class Routes extends React.Component<RouteComponentProps<{}>> {
         return (
             <React.Fragment>
                 <Header />
+                <TwitterMeta image='https://abemagraph.info/images/icon_128.png' />
+                <OgpMeta image='https://abemagraph.info/images/icon_128.png' type='website' />
                 <Container>
                     <Switch>
                         <Route path='/' exact component={Current} />

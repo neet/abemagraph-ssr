@@ -128,7 +128,7 @@ class Details extends React.Component<ReduxProps<ConnectedProps> & RouteComponen
                         <OgpMeta title={slot.title} type='video' image={largeImage} />
                         <TwitterMeta title={slot.title} card='summary_large_image'
                             label1='チャンネル' data1={channel ? channel.name : slot.channelId} image={largeImage} />
-                        <SearchMeta title={slot.title} description={slot.content} />
+                        <SearchMeta title={slot.title} description={slot.highlight || slot.content} />
                         <div className='pull-right'>
                             {now > 0 && now > slot.startAt ? (
                                 isOnAir ?
