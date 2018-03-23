@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { pure } from 'recompose';
 import * as moment from 'moment';
+import * as _ from 'lodash';
 
 import { PageHeader } from '../components/PageHeader';
 import { ReduxProps, connect } from '../utils/connect';
@@ -174,11 +175,7 @@ export default connect<ConnectedProps>({
             time: time + offset,
             comment,
             view,
-            channels: channel.reduce((obj, item, index) => {
-                if (item !== 0)
-                    obj[channels[index]] = { comment: item[0], view: item[1] };
-                return obj;
-            }, {})
+            channels: _.mapValues(channel, item => ({ comment: item[0], view: item[1] }))
         }));
     },
     isFailed: state => !!state.all.allStatus,
