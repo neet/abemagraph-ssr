@@ -60,6 +60,7 @@ class Details extends React.Component<ReduxProps<ConnectedProps> & RouteComponen
         const perMinLogs = logsData.map((v, i, a) => i === 0 ? (v[0] - startAt * 1000 > 30 * 1000 ? [v[0], Math.floor((v[1] || 0) / (v[0] - startAt * 1000) * 60 * 1000)] : [v[0], 0]) : [v[0], Math.floor((v[1] - a[i - 1][1]) / (a[i][0] - a[i - 1][0]) * 60 * 1000)]) as Array<[number, number]>;
         const title = type === 'comment' ? 'コメント数' : '閲覧数';
         return {
+            chart: { zoomType: 'x' },
             title: { text: title },
             xAxis: {
                 title: {
