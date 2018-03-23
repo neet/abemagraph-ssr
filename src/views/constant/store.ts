@@ -1,9 +1,10 @@
-import { BroadcastSlot, AllLogCompressed, SearchResult } from '../../types/abemagraph';
+import { BroadcastSlot, AllLogCompressed, SearchResult, BroadcastSortType } from '../../types/abemagraph';
 import { Channel, Slot } from '../../types/abema';
 import { Moment } from 'moment';
 
 export interface StoreBroadcast {
     slots: BroadcastSlot[];
+    sortType: BroadcastSortType;
     updated: number;
     isFetching: boolean;
     isFailed: boolean;
@@ -22,7 +23,7 @@ export interface StoreSlot {
 
 export interface StoreAll {
     allStatus: false | number;
-    date: Moment;
+    date: Moment | string; // SSR時のinitialStateはstring
     all: AllLogCompressed | undefined;
 }
 

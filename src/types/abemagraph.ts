@@ -21,6 +21,7 @@ export interface All {
 
 export type Stats = { comment: number, view: number, updated: number };
 
+export type BroadcastSortType = 'v' | 'c' | 'vpm' | 'cpm' | 'ch';
 export interface BroadcastSlot {
     id: string;
     channelId: string;
