@@ -44,6 +44,7 @@ export const normalizePerson = (arr: string[]) =>
     _.chain(arr).flatMap(str => str.split(/[／\/]/))
         .flatMap(str => str.split(/[、,]/))
         .map(str => str.replace(/^.*[:：]/, '').replace(/[\(【].*[\)】]/g, '').replace(/\s/g, ''))
+        .flatMap(str => str.split(/・/))
         .filter(str => !str.match(/(その)?他$/))
         .value();
 
