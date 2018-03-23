@@ -120,7 +120,7 @@ class Current extends React.Component<ReduxProps<ConnectedProps> & RouteComponen
 
 export default connect<ConnectedProps>({
     slots: ({ app, broadcast }) => {
-        const now = Date.now();
+        const now = Date.now() / 1000;
         return broadcast.slots.map(slot => ({
             ...slot,
             stats: slot.stats || { view: 0, comment: 0, updated: now },
