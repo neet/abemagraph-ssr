@@ -19,31 +19,33 @@ type ConnectedProps = {
     date: moment.Moment,
     log?: AllLog,
     isFailed: boolean,
+    isFetching: boolean,
+    hasData: boolean,
     channels: Channel[],
     logChannels: string[],
-    failedCode: number
 };
-class All extends React.Component<ReduxProps<ConnectedProps> & RouteComponentProps<{ date: string }>, { isMounted: boolean }>{
+type Props = ReduxProps<ConnectedProps> & RouteComponentProps<{ date: string }>;
+class All extends React.Component<Props, { isMounted: boolean }>{
     constructor(props) {
         super(props);
         this.state = { isMounted: false };
     }
 
-    componentWillMount() {
-    }
     componentDidMount() {
         this.setState({ isMounted: true });
-        if (this.props.channels.length === 0)
-            this.props.actions.app.fetchChannels();
 
+        const curDate = this.props.date;
         const date = this.props.match.params.date ? moment(this.props.match.params.date, 'YYYYMMDD') : moment();
-        if (date) this.props.actions.all.fetchAll(date);
+        if (date && (!curDate.isSame(date.startOf('day')) || !this.props.hasData))
+            this.props.actions.all.fetchAll(date);
     }
 
-    componentDidUpdate(prevProps: RouteComponentProps<{ date: string }>) {
+    componentDidUpdate(prevProps: Props) {
         if (prevProps.match.params !== this.props.match.params) {
             this.props.actions.all.invalidateAll();
-            this.componentDidMount();
+            const date = this.props.match.params.date ? moment(this.props.match.params.date, 'YYYYMMDD') : moment();
+            if (date)
+                this.props.actions.all.fetchAll(date);
         }
     }
     componentWillUnmount() {
@@ -117,9 +119,19 @@ class All extends React.Component<ReduxProps<ConnectedProps> & RouteComponentPro
         };
     }
     render() {
+        const {
+            isFailed,
+            isFetching,
+            hasData,
+            date,
+            log,
+            match,
+            history
+        } = this.props;
         const today = moment().endOf('day');
-        if (this.props.isFailed) {
-            const date = this.props.match.params.date ? moment(this.props.match.params.date, 'YYYYMMDD') : moment();
+        if (isFetching) return <Loader />;
+        if (isFailed || !hasData) {
+            const date = match.params.date ? moment(match.params.date, 'YYYYMMDD') : moment();
             return (
                 <>
                     <Title title={`全体統計情報 - AbemaGraph`} />
@@ -130,15 +142,14 @@ class All extends React.Component<ReduxProps<ConnectedProps> & RouteComponentPro
                                 timeFormat={false}
                                 isValidDate={current => current.isBefore(today)}
                                 defaultValue={date}
-                                onChange={nextDate => typeof nextDate === 'object' && this.props.history.push(`/all/${(nextDate as moment.Moment).format('YYYYMMDD')}`)} /> : null}
+                                onChange={nextDate => typeof nextDate === 'object' && history.push(`/all/${(nextDate as moment.Moment).format('YYYYMMDD')}`)} /> : null}
                         </div>
                     </PageHeader>
                     <p>該当する情報を発見できませんでした。別の日時をお試しください</p>
                 </>
             );
         }
-        if (!this.props.log) return <Loader />;
-        const { date, log } = this.props;
+
         const dateStr = date.format('YYYY/MM/DD');
         return (
             <>
@@ -150,7 +161,7 @@ class All extends React.Component<ReduxProps<ConnectedProps> & RouteComponentPro
                             timeFormat={false}
                             isValidDate={current => current.isBefore(today)}
                             defaultValue={date}
-                            onChange={nextDate => typeof nextDate === 'object' && this.props.history.push(`/all/${(nextDate as moment.Moment).format('YYYYMMDD')}`)} /> : null}
+                            onChange={nextDate => typeof nextDate === 'object' && history.push(`/all/${(nextDate as moment.Moment).format('YYYYMMDD')}`)} /> : null}
                     </div>
                 </PageHeader>
                 <PageHeader mini text={<><Glyphicon glyph='comment' /> コメントの増加</>} />
@@ -175,11 +186,15 @@ export default connect<ConnectedProps>({
             time: time + offset,
             comment,
             view,
-            channels: _.mapValues(channel, item => ({ comment: item[0], view: item[1] }))
+            channels: _.mapValues(channel, (item, index) => ({
+                comment: item[0],
+                view: item[1]
+            }))
         }));
     },
-    isFailed: state => !!state.all.allStatus,
-    failedCode: state => state.all.allStatus || 0,
+    isFailed: ({ all }) => all.isFailed,
+    isFetching: ({ all }) => all.isFetching,
+    hasData: ({ all }) => !!all.all,
     channels: state => state.app.channels,
     logChannels: state => state.all.all ? state.all.all[1] : []
 })(pure(All));

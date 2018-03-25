@@ -22,9 +22,10 @@ export interface StoreSlot {
 }
 
 export interface StoreAll {
-    allStatus: false | number;
     date: Moment | string; // SSR時のinitialStateはstring
     all: AllLogCompressed | undefined;
+    isFailed: boolean;
+    isFetching: boolean;
 }
 
 export interface StoreSearch {
