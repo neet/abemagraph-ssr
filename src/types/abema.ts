@@ -117,3 +117,9 @@ export interface SlotAudienceItem {
 export interface SlotAudience {
     slotAudiences: SlotAudienceItem[];
 }
+
+export interface Sitemap {
+    urlset: {
+        url: Array<{ loc: string[] }>;
+    };
+}
