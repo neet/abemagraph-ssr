@@ -68,7 +68,7 @@ class Collector {
             if (insertSlots.length > 0) {
                 appLogger.info(`${insertSlots.length} slots will be inserted`);
                 await this.programsDb.insertMany(_.uniqBy(_.flatMap(insertSlots, s => s.programs), p => p.id).map(program => ({ ...program, _id: program.id })), { ordered: false }).catch(err => {
-                    appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors.length);
+                    appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors ? err.writeErrors.length : 'unknown');
                 });
                 await this.slotsDb.bulkWrite(insertSlots.map(slot => ({
                     replaceOne: {
@@ -95,10 +95,10 @@ class Collector {
 
         const slots = this.slots;
         await this.channelsDb.insertMany(this.timetable.channels.map(channel => ({ ...channel, _id: channel.id })), { ordered: false }).catch(err => {
-            appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors.length);
+            appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors ? err.writeErrors.length : 'unknown');
         });
         await this.programsDb.insertMany(_.uniqBy(_.flatMap(slots, s => s.programs), p => p.id).map(program => ({ ...program, _id: program.id })), { ordered: false }).catch(err => {
-            appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors.length);
+            appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors ? err.writeErrors.length : 'unknown');
         });
         await this.slotsDb.bulkWrite(slots.map(slot => ({
             replaceOne: {
