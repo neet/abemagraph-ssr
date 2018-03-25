@@ -11,19 +11,26 @@ import Details from './routes/Details';
 import All from './routes/All';
 import { Redirect, RouteComponentProps } from 'react-router';
 import Search from './routes/Search';
+import { TwitterMeta, OgpMeta } from './components/RouterControl';
 
 export class Routes extends React.Component<RouteComponentProps<{}>> {
     componentDidUpdate(prevProps: RouteComponentProps<{}>) {
         if (this.props.location !== prevProps.location) {
-            const event = document.createEvent('CustomEvent');
-            event.initCustomEvent('locationchanged', false, false, {});
-            window.dispatchEvent(event);
+            try {
+                const event = document.createEvent('CustomEvent');
+                event.initCustomEvent('locationchanged', false, false, {});
+                window.dispatchEvent(event);
+            } catch (e) {
+                console.log('💩IE💩', e);
+            }
         }
     }
     render() {
         return (
             <React.Fragment>
                 <Header />
+                <TwitterMeta image='https://abemagraph.info/images/icon_128.png' />
+                <OgpMeta image='https://abemagraph.info/images/icon_128.png' type='website' />
                 <Container>
                     <Switch>
                         <Route path='/' exact component={Current} />

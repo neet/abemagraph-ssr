@@ -3,15 +3,18 @@ import { Db, Collection } from 'mongodb';
 import { writeFile, readFile, exists } from 'async-file';
 import * as moment from 'moment';
 import * as _ from 'lodash';
+import { parseString } from 'xml2js';
 
 import Config from '../config';
 import { downloadTimetable, storeTimetableToES } from './timetable';
 import { app as appLogger } from '../logger';
-import { Slot, Program, Channel, Timetable } from '../types/abema';
+import { Slot, Program, Channel, Timetable, Sitemap } from '../types/abema';
 import { getSlotAudience } from './audience';
 import { Log, All, ESData } from '../types/abemagraph';
 import { sleep } from '../utils/sleep';
 import { purgeId } from '../utils/purge-id';
+import { request } from '../utils/request';
+import { api } from '../utils/abema';
 
 class Collector {
     slotsDb: Collection<Slot & { programs: string[] }>;
@@ -26,7 +29,7 @@ class Collector {
     private cancelPromise: Promise<void> | null = null;
     private cancel: Function | null = null;
     private promises: Array<Promise<void>> = [];
-    
+
     initialize(db: Db, es: Client) {
         this.db = db;
         this.es = es;
@@ -35,6 +38,52 @@ class Collector {
         this.logsDb = db.collection('logs');
         this.channelsDb = db.collection('channels');
         this.allDb = db.collection('all');
+    }
+
+    async insertMissedSlotsFromSitemap() {
+        if (!this.db || !this.es) throw new Error();
+        const sitemapXml = (await request({
+            url: 'https://abema.tv/sitemap-slots-0.xml',
+            method: 'GET',
+            gzip: true,
+            encoding: 'utf8'
+        })).body as string;
+        const sitemap: Sitemap = await new Promise<Sitemap>((resolve, reject) => {
+            parseString(sitemapXml, (err, res) => {
+                if (err || !res) reject(err);
+                resolve(res);
+            });
+        });
+        if (sitemap.urlset && sitemap.urlset.url && sitemap.urlset.url.length > 0) {
+            const slotIds = sitemap.urlset.url.map(entry => entry.loc[0].replace(/https.+\/slots\//, ''));
+            const slots = this.slots;
+            // console.log(slotIds);
+            const insertSlots: Slot[] = [];
+            for (const slotId of slotIds) {
+                if (slots.find(slot => slot.id === slotId) || await this.slotsDb.findOne({ _id: slotId })) continue;
+                const slotInfo: Slot = (await api<{ slot: Slot }>(`media/slots/${slotId}`)).slot;
+                appLogger.debug(`Slot: ${slotId} (${slotInfo.channelId} -> not found`);
+                insertSlots.push(slotInfo);
+            }
+            if (insertSlots.length > 0) {
+                appLogger.info(`${insertSlots.length} slots will be inserted`);
+                await this.programsDb.insertMany(_.uniqBy(_.flatMap(insertSlots, s => s.programs), p => p.id).map(program => ({ ...program, _id: program.id })), { ordered: false }).catch(err => {
+                    appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors ? err.writeErrors.length : 'unknown');
+                });
+                await this.slotsDb.bulkWrite(insertSlots.map(slot => ({
+                    replaceOne: {
+                        filter: { _id: slot.id },
+                        replacement: {
+                            ...slot,
+                            _id: slot.id,
+                            programs: slot.programs.map(p => p.id)
+                        },
+                        upsert: true
+                    }
+                })));
+                await storeTimetableToES(this.es, insertSlots);
+            }
+        }
     }
 
     async updateFullTimetable() {
@@ -46,10 +95,10 @@ class Collector {
 
         const slots = this.slots;
         await this.channelsDb.insertMany(this.timetable.channels.map(channel => ({ ...channel, _id: channel.id })), { ordered: false }).catch(err => {
-            appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors.length);
+            appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors ? err.writeErrors.length : 'unknown');
         });
         await this.programsDb.insertMany(_.uniqBy(_.flatMap(slots, s => s.programs), p => p.id).map(program => ({ ...program, _id: program.id })), { ordered: false }).catch(err => {
-            appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors.length);
+            appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors ? err.writeErrors.length : 'unknown');
         });
         await this.slotsDb.bulkWrite(slots.map(slot => ({
             replaceOne: {
@@ -62,6 +111,7 @@ class Collector {
                 upsert: true
             }
         })));
+        await this.insertMissedSlotsFromSitemap();
         appLogger.debug('MongoDB updated');
         await storeTimetableToES(this.es, slots);
     }
@@ -93,8 +143,8 @@ class Collector {
             if (pastLogs[audience.slotId] && Object.keys(pastLogs[audience.slotId].log).length >= 2) {
                 const past = pastLogs[audience.slotId];
                 const lastKey = Object.keys(past.log).map(v => Number(v)).sort((a, b) => b - a)[0];
-                const commentInc = Math.floor((audience.commentCount - past.log[`${lastKey}`].c) / (now - lastKey) * 60);
-                const viewInc = Math.floor((audience.viewCount - past.log[`${lastKey}`].v) / (now - lastKey) * 60);
+                const commentInc = Math.floor(((audience.commentCount || 0) - past.log[`${lastKey}`].c) / (now - lastKey) * 60);
+                const viewInc = Math.floor(((audience.viewCount || 0) - past.log[`${lastKey}`].v) / (now - lastKey) * 60);
                 if (commentInc > 0 && viewInc > 0) {
                     all.ch[audience.channelId] = [commentInc, viewInc];
                     all.c += commentInc;
@@ -113,8 +163,8 @@ class Collector {
             await this.logsDb.updateOne({ _id: audience.slotId }, {
                 '$set': {
                     [`log.${now}`]: {
-                        c: audience.commentCount,
-                        v: audience.viewCount
+                        c: audience.commentCount || 0,
+                        v: audience.viewCount || 0
                     }
                 }
             }, { upsert: true });

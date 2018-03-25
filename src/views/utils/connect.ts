@@ -1,5 +1,6 @@
 import { connect as reduxConnect, ActionCreator } from 'react-redux';
 import { bindActionCreators, Dispatch, ActionCreatorsMapObject, AnyAction } from 'redux';
+import * as _ from 'lodash';
 
 import actions from '../actions';
 import { Store } from '../constant/store';
@@ -14,20 +15,21 @@ export interface ActionProps {
 
 export type ReduxProps<T> = ActionProps & T;
 
-function bind(actionMap: ActionMap | ActionCreator<{}>, dispatch: Dispatch<{}>): {} {
-    if (typeof actionMap === 'function') {
-        return bindActionCreators(actionMap, dispatch);
-    }
-    const keys = Object.keys(actionMap);
-    return keys.reduce((acc, key) => Object.assign(acc, { [key]: bind(actionMap[key] as ActionMap, dispatch) }), {});
-}
+const bind = (actionMap: ActionMap | ActionCreator<{}>, dispatch: Dispatch<{}>) =>
+    _.mapValues(actionMap, action =>
+        typeof action === 'function' ? bindActionCreators(action, dispatch) : bind(action, dispatch));
 
-export function connect<TOwnProps = {}, TImplProps = {}, TStateProps = Store>(mapStateToProps: {[key in keyof TOwnProps]: (state: TStateProps) => TOwnProps[key]}) {
+export function connect<TOwnProps = {},
+    TImplProps = {},
+    TStateProps = Store>(
+        mapStateToProps: {
+            [P in keyof TOwnProps]: (state: TStateProps) => TOwnProps[P]
+        }) {
     return reduxConnect<TOwnProps, ActionProps>(
         (state: TStateProps): TOwnProps => {
-            const keys = Object.keys(mapStateToProps);
-            return keys.reduce((acc: TOwnProps, key: keyof TOwnProps) => Object.assign(acc, { [key]: mapStateToProps[key](state) }), {} as TOwnProps);
+            // tslint:disable-next-line:no-any
+            return _.mapValues<any, any>(mapStateToProps, mapStateToProp => mapStateToProp(state)) as TOwnProps;
         },
-        bind.bind(null, { actions }) as ActionProps
+        dispatch => bind({ actions }, dispatch)
     );
 }

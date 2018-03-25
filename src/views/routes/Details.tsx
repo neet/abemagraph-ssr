@@ -17,14 +17,15 @@ import { Title, StatusCode, OgpMeta, TwitterMeta, SearchMeta } from '../componen
 import { Highcharts } from '../components/Highcharts';
 
 type Logs = { [time: number]: { view: number, comment: number } };
-class Details extends React.Component<ReduxProps<{
+type ConnectedProps = {
     slot?: Slot,
     channel?: Channel,
     slotStatus: false | number,
     logsStatus: false | number,
     logs?: Logs,
     logsUpdated: number
-}> & RouteComponentProps<{ slotId: string }>, { now: number }> {
+};
+class Details extends React.Component<ReduxProps<ConnectedProps> & RouteComponentProps<{ slotId: string }>, { now: number }> {
     constructor(props) {
         super(props);
         this.state = { now: 0 };
@@ -32,9 +33,6 @@ class Details extends React.Component<ReduxProps<{
     componentDidMount() {
         const { slot, channel, match: { params: { slotId } } } = this.props;
         const now = Date.now() / 1000;
-        if (slot && !channel) {
-            this.props.actions.app.fetchChannels();
-        }
         if ((!slot && slotId) || (slot && slotId !== slot.id)) {
             this.props.actions.slot.fetchSlot(slotId);
         }
@@ -44,11 +42,14 @@ class Details extends React.Component<ReduxProps<{
         this.setState({ now });
     }
     componentDidUpdate({ match: { params: { slotId } }, slot }: RouteComponentProps<{ slotId: string }> & { slot?: Slot }) {
+        const now = Date.now() / 1000;
         if (this.props.match.params.slotId !== slotId) {
-            this.componentDidMount();
+            this.props.actions.slot.fetchSlot(this.props.match.params.slotId);
         }
-        if (this.props.slot !== slot && this.props.slot && this.props.slot.startAt < Date.now() / 1000) {
-            this.props.actions.slot.fetchSlotLogs(this.props.slot.id); // 普通にRouter
+        if (this.props.slot !== slot && this.props.slot) {
+            if (this.props.slot.startAt < now) {
+                this.props.actions.slot.fetchSlotLogs(this.props.slot.id);
+            }
         }
     }
     componentWillUnmount() {
@@ -59,6 +60,7 @@ class Details extends React.Component<ReduxProps<{
         const perMinLogs = logsData.map((v, i, a) => i === 0 ? (v[0] - startAt * 1000 > 30 * 1000 ? [v[0], Math.floor((v[1] || 0) / (v[0] - startAt * 1000) * 60 * 1000)] : [v[0], 0]) : [v[0], Math.floor((v[1] - a[i - 1][1]) / (a[i][0] - a[i - 1][0]) * 60 * 1000)]) as Array<[number, number]>;
         const title = type === 'comment' ? 'コメント数' : '閲覧数';
         return {
+            chart: { zoomType: 'x' },
             title: { text: title },
             xAxis: {
                 title: {
@@ -102,7 +104,7 @@ class Details extends React.Component<ReduxProps<{
         if (this.props.slotStatus) {
             return <><ErrorPage code={this.props.slotStatus} /><StatusCode code={404} /></>;
         }
-        if (slot && channel) {
+        if (slot) {
             const elapsedSec = this.state.now - slot.startAt;
             const isEnd = slot.endAt < this.state.now;
             const isOnAir = this.state.now > slot.startAt && this.state.now < slot.endAt;
@@ -126,8 +128,8 @@ class Details extends React.Component<ReduxProps<{
                         <Title title={`${slot.title} - AbemaGraph`} />
                         <OgpMeta title={slot.title} type='video' image={largeImage} />
                         <TwitterMeta title={slot.title} card='summary_large_image'
-                            label1='チャンネル' data1={channel.name} image={largeImage} />
-                        <SearchMeta title={slot.title} description={slot.content} />
+                            label1='チャンネル' data1={channel ? channel.name : slot.channelId} image={largeImage} />
+                        <SearchMeta title={slot.title} description={slot.highlight || slot.content} />
                         <div className='pull-right'>
                             {now > 0 && now > slot.startAt ? (
                                 isOnAir ?
@@ -138,7 +140,7 @@ class Details extends React.Component<ReduxProps<{
                                     ) : slot.flags.timeshift ? (
                                         slot.timeshiftEndAt < now ?
                                             (<button className='btn btn-info' disabled>放送終了(TS期限切れ)</button>)
-                                            : (slot.flags.timeshiftFree && slot.timeshiftFreeEndAt > now ?
+                                            : (slot.flags.timeshiftFree && slot.timeshiftFreeEndAt && slot.timeshiftFreeEndAt > now ?
                                                 <a href={officialLink} className='btn btn-primary'>無料タイムシフト</a> :
                                                 <a href={officialLink} className='btn btn-info'>タイムシフト</a>
                                             )
@@ -154,7 +156,7 @@ class Details extends React.Component<ReduxProps<{
                         </dd>
                         <dt>チャンネル</dt>
                         <dd>
-                            <Link to={`/search?q=channel:${channel.id}+since:now`}>{channel.name} ({channel.id})</Link>
+                            <Link to={`/search?q=channel:${slot.channelId}+since:now`}>{channel ? `${channel.name} (${channel.id})` : slot.channelId}</Link>
                         </dd>
                         <dt><Glyphicon glyph='calendar' /> 放送日時</dt>
                         <dd>
@@ -176,7 +178,7 @@ class Details extends React.Component<ReduxProps<{
                         </>) : null}
                         <dt><Glyphicon glyph='time' /> タイムシフト</dt>
                         <dd>{slot.flags.timeshift ?
-                            slot.flags.timeshiftFree && slot.timeshiftFreeEndAt > now ?
+                            slot.flags.timeshiftFree && slot.timeshiftFreeEndAt && slot.timeshiftFreeEndAt > now ?
                                 (now > 0 ? `無料 - ${moment.unix(slot.timeshiftFreeEndAt || slot.timeshiftEndAt).format('MM/DD(ddd) HH:mm')}まで` : '無料') :
                                 (now > 0 ? `プレミアム - ${moment.unix(slot.timeshiftEndAt).format('MM/DD(ddd) HH:mm')}まで` : 'プレミアム') : 'なし'}</dd>
                         {slot.startAt < now2 ? <>
@@ -223,7 +225,7 @@ class Details extends React.Component<ReduxProps<{
     }
 }
 
-export default connect<{ slot?: Slot, channel?: Channel, slotStatus: false | number, logsStatus: false | number, logs?: Logs, logsUpdated: number }>({
+export default connect<ConnectedProps>({
     slot: state => state.slot.slot,
     channel: ({ app: { channels }, slot: { slot } }) => slot ? channels.find(ch => ch.id === slot.channelId) : undefined,
     slotStatus: state => state.slot.slotStatus,

@@ -5,7 +5,7 @@ import * as moment from 'moment';
 import { Container } from '../components/Container';
 import { PageHeader } from '../components/PageHeader';
 import { ReduxProps, connect } from '../utils/connect';
-import { BroadcastSlot } from '../../types/abemagraph';
+import { BroadcastSlot, Stats, BroadcastSortType } from '../../types/abemagraph';
 import { Link, withRouter, RouteComponentProps } from 'react-router-dom';
 import { Title } from '../components/RouterControl';
 import { Glyphicon } from '../components/Glyphicon';
@@ -15,25 +15,25 @@ import { parse } from '../utils/querystring';
 import { Loader } from '../components/Loader';
 import { ErrorPage } from '../components/Error';
 
-type Sort = 'v' | 'c' | 'vpm' | 'cpm' | 'ch';
-class Current extends React.Component<ReduxProps<{
-    slots: BroadcastSlot[],
+type ConnectedProps = {
+    slots: Array<BroadcastSlot & { stats: Stats, vpm: number, cpm: number, channel?: Channel }>,
+    sortType: BroadcastSortType,
     updated: number,
-    channels: Channel[],
     isFetching: boolean,
-    isFailed: boolean
-}> & RouteComponentProps<{}>, { mounted: boolean, sortBy: Sort }>{
+    isFailed: boolean,
+    viewTotal: number,
+    commentTotal: number
+};
+class Current extends React.Component<ReduxProps<ConnectedProps> & RouteComponentProps<{}>, { mounted: boolean }>{
     constructor(props) {
         super(props);
-        this.state = { mounted: false, sortBy: 'vpm' };
+        this.state = { mounted: false };
     }
 
     componentWillMount() {
         this.setSortBy();
     }
     componentDidMount() {
-        if (this.props.slots.length > 0 && this.props.channels.length > 0 && this.props.channels.length !== this.props.slots.length)
-            this.props.actions.app.fetchChannels();
         if (Date.now() - this.props.updated > 60 * 1000)
             this.props.actions.broadcast.fetchBroadcastSlots();
         this.setState({ mounted: true });
@@ -48,62 +48,38 @@ class Current extends React.Component<ReduxProps<{
 
     private setSortBy() {
         if (this.props.location.search) {
-            const search: { sort?: Sort } = parse(this.props.location.search);
-            if (search.sort && this.state.sortBy !== search.sort && ['v', 'c', 'vpm', 'cpm', 'ch'].indexOf(search.sort) >= 0) {
-                this.setState({ sortBy: search.sort });
+            const search: { sort?: BroadcastSortType } = parse(this.props.location.search);
+            if (search.sort && ['v', 'c', 'vpm', 'cpm', 'ch'].includes(search.sort)) {
+                this.props.actions.broadcast.setSortType(search.sort);
             }
         }
     }
-    private findChannelName(channelId: string) {
-        const channel = this.findChannel(channelId);
-        return channel ? channel.name : channelId;
-    }
-    private findChannel(channelId: string) {
-        return this.props.channels.find(ch => ch.id === channelId);
-    }
     private setSortUrl(e: React.ChangeEvent<HTMLSelectElement>) {
         const sort = e.target.value || 'vpm';
-        if (['v', 'c', 'vpm', 'cpm', 'ch'].indexOf(sort) >= 0)
+        if (['v', 'c', 'vpm', 'cpm', 'ch'].includes(sort))
             this.props.history.replace(`?sort=${sort}`);
     }
     render() {
         const now = Date.now() / 1000;
-        const { mounted, sortBy } = this.state;
+        const { mounted } = this.state;
+        const {
+            isFailed,
+            isFetching,
+            slots,
+            viewTotal,
+            commentTotal,
+            sortType
+        } = this.props;
 
-        if (this.props.isFetching) return <Loader />;
-        if (this.props.isFailed) return <ErrorPage />;
+        if (isFetching) return <Loader />;
+        if (isFailed) return <ErrorPage />;
 
-        const slots = this.props.slots.map(slot => ({
-            ...slot,
-            stats: slot.stats || { view: 0, comment: 0, updated: now },
-            vpm: slot.stats ? slot.stats.view / (now - slot.startAt) * 60 : 0,
-            cpm: slot.stats ? slot.stats.comment / (now - slot.startAt) * 60 : 0
-        })).sort((a, b) => {
-            if (sortBy === 'v')
-                return b.stats.view - a.stats.view;
-            else if (sortBy === 'c')
-                return b.stats.comment - a.stats.comment;
-            else if (sortBy === 'cpm')
-                return b.cpm - a.cpm;
-            else if (sortBy === 'vpm')
-                return b.vpm - a.vpm;
-            else {
-                const ach = this.findChannel(a.channelId);
-                const bch = this.findChannel(b.channelId);
-                if (ach && bch)
-                    return ach.order - bch.order;
-                else
-                    return a.channelId.localeCompare(b.channelId);
-            }
-        });
-        const viewTotal = slots.reduce((total, item) => total += item.stats ? item.stats.view : 0, 0);
-        const commentTotal = slots.reduce((total, item) => total += item.stats ? item.stats.comment : 0, 0);
         return (
             <>
                 <Title title='AbemaTV情報サイト(非公式) AbemaGraph' />
                 <PageHeader text='現在放送中の番組'>
                     <div className='pull-right'>
-                        <select className='form-control' onChange={e => this.setSortUrl(e)} value={sortBy}>
+                        <select className='form-control' onChange={e => this.setSortUrl(e)} value={sortType}>
                             <option value='ch'>チャンネル順</option>
                             <option value='v'>閲覧数</option>
                             <option value='c'>コメント数</option>
@@ -124,7 +100,7 @@ class Current extends React.Component<ReduxProps<{
                             <h4 className='list-group-item-heading'>
                                 <Mark mark={slot.mark} showItem={['first', 'last', 'live', 'newcomer', 'bingeWatching']} />
                                 {slot.title}
-                                <span className='pull-right label label-success'>{this.findChannelName(slot.channelId)}</span>
+                                <span className='pull-right label label-success'>{slot.channel ? slot.channel.name : slot.channelId}</span>
                             </h4>
                             <p className='list-group-item-text'>
                                 {`${moment.unix(slot.startAt).format('YYYY/MM/DD(ddd) HH:mm:ss')} ~ ${moment.unix(slot.startAt + slot.duration).format('HH:mm:ss')}`}
@@ -142,10 +118,36 @@ class Current extends React.Component<ReduxProps<{
     }
 }
 
-export default connect<{ slots: BroadcastSlot[], updated: number, channels: Channel[], isFetching: boolean, isFailed: boolean }>({
-    slots: state => state.broadcast.slots,
+export default connect<ConnectedProps>({
+    slots: ({ app, broadcast }) => {
+        const now = Date.now() / 1000;
+        return broadcast.slots.map(slot => ({
+            ...slot,
+            stats: slot.stats || { view: 0, comment: 0, updated: now },
+            vpm: slot.stats ? slot.stats.view / (now - slot.startAt) * 60 : 0,
+            cpm: slot.stats ? slot.stats.comment / (now - slot.startAt) * 60 : 0,
+            channel: app.channels.find(ch => ch.id === slot.channelId)
+        })).sort((a, b) => {
+            if (broadcast.sortType === 'v')
+                return b.stats.view - a.stats.view;
+            else if (broadcast.sortType === 'c')
+                return b.stats.comment - a.stats.comment;
+            else if (broadcast.sortType === 'cpm')
+                return b.cpm - a.cpm;
+            else if (broadcast.sortType === 'vpm')
+                return b.vpm - a.vpm;
+            else {
+                if (a.channel && b.channel)
+                    return a.channel.order - b.channel.order;
+                else
+                    return a.channelId.localeCompare(b.channelId);
+            }
+        });
+    },
+    sortType: ({ broadcast }) => broadcast.sortType,
     updated: state => state.broadcast.updated,
-    channels: state => state.app.channels,
     isFailed: state => state.broadcast.isFailed,
-    isFetching: state => state.broadcast.isFetching
+    isFetching: state => state.broadcast.isFetching,
+    viewTotal: ({ broadcast }) => broadcast.slots.reduce((total, item) => total += item.stats ? item.stats.view : 0, 0),
+    commentTotal: ({ broadcast }) => broadcast.slots.reduce((total, item) => total += item.stats ? item.stats.comment : 0, 0)
 })(pure(Current));

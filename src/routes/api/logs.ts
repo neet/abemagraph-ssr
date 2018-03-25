@@ -24,10 +24,7 @@ export const allLog = api.get('/all/:date', async (date: string) => {
     if (await allCursor.hasNext()) {
         const allArr = await allCursor.toArray();
         const channels = _.uniq(_.flatMap(allArr, item => Object.keys(item.ch))).sort();
-        const channelDict = channels.reduce((p, k, i) => {
-            p[k] = i;
-            return p;
-        }, {});
+        const channelDict = _.invert(channels);
         const min = allArr[0].t;
         return [min, channels, allArr.map(item => ([
             item.t - min,
