@@ -30,7 +30,7 @@ const apize = (method: 'get' | 'post') => <P, R, P1, P2>(path: string, func: (pa
         });
     });
     return async (param: P): Promise<R> => {
-        const cacheKey = Object.assign(param || {}, { path });
+        const cacheKey = JSON.stringify({ param: param || null, path });
         if (cacheKey && cache.has(cacheKey)) {
             return cache.get(cacheKey) as R;
         }
