@@ -79,7 +79,7 @@ class Collector {
                     this.timetable.channels.push({
                         id: channelId,
                         name: chInfoDb ? chInfoDb.name : channelId,
-                        order: 255
+                        order: chInfoDb ? chInfoDb.order : 255,
                     });
                 }
 
