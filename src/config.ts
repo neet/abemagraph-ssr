@@ -28,3 +28,5 @@ interface Config {
 
 const config = (() => safeLoad(readFileSync('./config.yml', { encoding: 'utf8' })))() as Config;
 export default config;
+
+export const assetsManifest = (() => JSON.parse(readFileSync('./assets/webpack-manifest.json', { encoding: 'utf8' })))() as { [key: string]: string };

@@ -60,28 +60,28 @@ class Collector {
             // console.log(slotIds);
             const insertSlots: Slot[] = [];
             for (const slotId of slotIds) {
-                if (slots.find(slot => slot.id === slotId) || await this.slotsDb.findOne({ _id: slotId })) continue;
+                if (slots.find(slot => slot.id === slotId)) continue;
+                const slotDbInfo = await this.findSlot(slotId);
+                if (slotDbInfo && slotDbInfo.length > 0) {
+                    insertSlots.push(slotDbInfo[0]);
+                    continue;
+                }
                 const slotInfo: Slot = (await api<{ slot: Slot }>(`media/slots/${slotId}`)).slot;
                 appLogger.debug(`Slot: ${slotId} (${slotInfo.channelId} -> not found`);
                 insertSlots.push(slotInfo);
             }
-            if (insertSlots.length > 0) {
-                appLogger.info(`${insertSlots.length} slots will be inserted`);
-                await this.programsDb.insertMany(_.uniqBy(_.flatMap(insertSlots, s => s.programs), p => p.id).map(program => ({ ...program, _id: program.id })), { ordered: false }).catch(err => {
-                    appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors ? err.writeErrors.length : 'unknown');
-                });
-                await this.slotsDb.bulkWrite(insertSlots.map(slot => ({
-                    replaceOne: {
-                        filter: { _id: slot.id },
-                        replacement: {
-                            ...slot,
-                            _id: slot.id,
-                            programs: slot.programs.map(p => p.id)
-                        },
-                        upsert: true
-                    }
+            if (insertSlots.length > 0 && this.timetable) {
+                const loadedChannels = this.timetable.channels;
+                const channelIds = _.uniqBy(insertSlots, 'channelId').map(slot => slot.channelId);
+                this.timetable.channels.push(...channelIds
+                    .filter(channelId => !loadedChannels.some(ch => ch.id === channelId))
+                    .map(id => ({ id, name: id, order: 255 })));
+                this.timetable.channelSchedules.push(...channelIds.map(channelId => ({
+                    channelId,
+                    slots: insertSlots.filter(slot => slot.channelId === channelId),
+                    date: moment().format('YYYYMMDD')
                 })));
-                await storeTimetableToES(this.es, insertSlots);
+                appLogger.info(`${insertSlots.length} slots will be inserted`);
             }
         }
     }
@@ -94,9 +94,16 @@ class Collector {
         appLogger.debug('Saved timetable file');
 
         const slots = this.slots;
-        await this.channelsDb.insertMany(this.timetable.channels.map(channel => ({ ...channel, _id: channel.id })), { ordered: false }).catch(err => {
-            appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors ? err.writeErrors.length : 'unknown');
-        });
+        await this.channelsDb.bulkWrite(this.timetable.channels.map(channel => ({
+            replaceOne: {
+                filter: { _id: channel.id },
+                replacement: {
+                    ...channel,
+                    _id: channel.id,
+                },
+                upsert: true
+            }
+        })));
         await this.programsDb.insertMany(_.uniqBy(_.flatMap(slots, s => s.programs), p => p.id).map(program => ({ ...program, _id: program.id })), { ordered: false }).catch(err => {
             appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors ? err.writeErrors.length : 'unknown');
         });

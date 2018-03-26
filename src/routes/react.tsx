@@ -13,7 +13,7 @@ import { Store } from '../views/constant/store';
 import { getSlot } from './api/media';
 import { broadcast, broadcastChannels } from './api/broadcast';
 import { allLog } from './api/logs';
-import Config from '../config';
+import Config, { assetsManifest } from '../config';
 import { search } from './api/search';
 
 const routeInfo: Array<RouteProps & { fetchInitialState?: (state: Store, req: Request, match: match<{}>) => Promise<Store> }> = [
@@ -117,14 +117,14 @@ export const renderSSR = async (req: Request, res: Response) => {
 ${_.map(context.meta, (value, key) => `<meta property="${key}" content="${sanitize(value)}" />`).join('')}
 <title>${context.title}</title>
 <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon" />
-<link href="/assets/app.css" rel="stylesheet" />
+<link href="/assets/${assetsManifest['app.css'] || 'app.css'}" rel="stylesheet" />
 </head>
 <body>
 <div id="app">${appMarkup}</div>
 <script>window.__INITIAL_STATE__ = ${JSON.stringify(store.getState())};</script>
-<script src="/assets/manifest.js"></script>
-<script defer src="/assets/vendor.js"></script>
-<script defer src="/assets/app.js"></script>
+<script src="/assets/${assetsManifest['manifest.js'] || 'manifest.js'}"></script>
+<script defer src="/assets/${assetsManifest['vendor.js'] || 'vendor.js'}"></script>
+<script defer src="/assets/${assetsManifest['app.js'] || 'app.js'}"></script>
 ${Config.trackingCode}
 </body>
 </html>`;
