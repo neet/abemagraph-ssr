@@ -89,7 +89,7 @@ class Collector {
     async updateFullTimetable() {
         if (!this.db || !this.es) throw new Error();
         this.timetable = await downloadTimetable();
-
+        await this.insertMissedSlotsFromSitemap();
         await writeFile(Config.cache.timetable, JSON.stringify(this.timetable), { encoding: 'utf8' });
         appLogger.debug('Saved timetable file');
 
@@ -118,7 +118,7 @@ class Collector {
                 upsert: true
             }
         })));
-        await this.insertMissedSlotsFromSitemap();
+
         appLogger.debug('MongoDB updated');
         await storeTimetableToES(this.es, slots);
     }
