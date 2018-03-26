@@ -3,6 +3,8 @@ const path = require('path');
 const poststylus = require('poststylus');
 const ExtractTestPlugin = require('extract-text-webpack-plugin');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
 
 const isProduction = process.env.NODE_ENV === 'production';
 const config = {
@@ -13,7 +15,7 @@ const config = {
         app: ['./src/views/index.tsx']
     },
     output: {
-        filename: '[name].js',
+        filename: '[name].[chunkhash].js',
         path: path.resolve(__dirname, 'assets')
     },
 
@@ -28,9 +30,9 @@ const config = {
                         'babelOptions': {
                             'babelrc': false,
                             'presets': [
-                                ["env", {
+                                ['env', {
                                     targets: {
-                                        browsers: ["last 2 versions", "ie >= 10"]
+                                        browsers: ['last 2 versions', 'ie >= 10']
                                     }
                                 }]
                             ]
@@ -64,12 +66,13 @@ const config = {
         ]
     },
     plugins: [
+        new CleanWebpackPlugin(['assets/*.css', 'assets/*.js', 'assets/*.map']),
         new webpack.LoaderOptionsPlugin({
             stylus: {
                 use: poststylus(['autoprefixer'])
             }
         }),
-        new ExtractTestPlugin('app.css'),
+        new ExtractTestPlugin('app.[chunkhash].css'),
         new webpack.ProvidePlugin({
             $: 'jquery',
             jQuery: 'jquery'
@@ -86,7 +89,8 @@ const config = {
             name: 'manifest',
             minChunks: Infinity,
         }),
-        new webpack.optimize.OccurrenceOrderPlugin()
+        new webpack.optimize.OccurrenceOrderPlugin(),
+        new ManifestPlugin({ fileName: 'webpack-manifest.json' })
     ],
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -96,6 +100,7 @@ const config = {
 
 if (!isProduction) {
     config.plugins = [
+        new CleanWebpackPlugin(['assets/*.css', 'assets/*.js', 'assets/*.map']),
         new webpack.NamedModulesPlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
         new webpack.LoaderOptionsPlugin({
@@ -107,7 +112,7 @@ if (!isProduction) {
             $: 'jquery',
             jQuery: 'jquery'
         }),
-        new ExtractTestPlugin('app.css'),
+        new ExtractTestPlugin('app.[chunkhash].css'),
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
         }),
@@ -118,7 +123,8 @@ if (!isProduction) {
         new webpack.optimize.CommonsChunkPlugin({
             name: 'manifest',
             minChunks: Infinity,
-        })
+        }),
+        new ManifestPlugin({ fileName: 'webpack-manifest.json' })
     ];
     config.devtool = 'source-map';
 }
