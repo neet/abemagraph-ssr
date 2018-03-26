@@ -73,9 +73,16 @@ class Collector {
             if (insertSlots.length > 0 && this.timetable) {
                 const loadedChannels = this.timetable.channels;
                 const channelIds = _.uniqBy(insertSlots, 'channelId').map(slot => slot.channelId);
-                this.timetable.channels.push(...channelIds
-                    .filter(channelId => !loadedChannels.some(ch => ch.id === channelId))
-                    .map(id => ({ id, name: id, order: 255 })));
+                for (const channelId of channelIds) {
+                    if (loadedChannels.some(ch => ch.id === channelId)) continue;
+                    const chInfoDb = await this.channelsDb.findOne({ _id: channelId });
+                    this.timetable.channels.push({
+                        id: channelId,
+                        name: chInfoDb ? chInfoDb.name : channelId,
+                        order: 255
+                    });
+                }
+
                 this.timetable.channelSchedules.push(...channelIds.map(channelId => ({
                     channelId,
                     slots: insertSlots.filter(slot => slot.channelId === channelId),
@@ -89,11 +96,6 @@ class Collector {
     async updateFullTimetable() {
         if (!this.db || !this.es) throw new Error();
         this.timetable = await downloadTimetable();
-        await this.insertMissedSlotsFromSitemap();
-        await writeFile(Config.cache.timetable, JSON.stringify(this.timetable), { encoding: 'utf8' });
-        appLogger.debug('Saved timetable file');
-
-        const slots = this.slots;
         await this.channelsDb.bulkWrite(this.timetable.channels.map(channel => ({
             replaceOne: {
                 filter: { _id: channel.id },
@@ -104,6 +106,12 @@ class Collector {
                 upsert: true
             }
         })));
+
+        await this.insertMissedSlotsFromSitemap();
+        await writeFile(Config.cache.timetable, JSON.stringify(this.timetable), { encoding: 'utf8' });
+        appLogger.debug('Saved timetable file');
+
+        const slots = this.slots;
         await this.programsDb.insertMany(_.uniqBy(_.flatMap(slots, s => s.programs), p => p.id).map(program => ({ ...program, _id: program.id })), { ordered: false }).catch(err => {
             appLogger.debug('inserted:', err.result.nInserted, 'failed:', err.writeErrors ? err.writeErrors.length : 'unknown');
         });
