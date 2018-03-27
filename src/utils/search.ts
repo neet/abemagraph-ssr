@@ -20,9 +20,9 @@ export function validateAndParseSearch(query: string): [string[], ParsedQuery] {
         const errors: string[] = [];
         const search: ParsedQuery = {
             keyword: (parsed.text || '').trim(),
-            channel: _.flatMap([parsed.channel || []], m => m as string),
-            series: _.flatMap([parsed.series || []], m => m as string),
-            group: _.flatMap([parsed.group || []], m => m as string),
+            channel: _.flatten([parsed.channel || []]) as string[],
+            series: _.flatten([parsed.series || []]) as string[],
+            group: _.flatten([parsed.group || []]) as string[],
             flag: []
         };
         if (parsed.sort) {
