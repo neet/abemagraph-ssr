@@ -1,9 +1,8 @@
-config.yml
 timetable.json
-node_modules/
-assets/*
+node_modules
+assets
 !assets/favicon.ico
 !assets/*.png
-bin/
+bin
 mongo
 elasticsearch

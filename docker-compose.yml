@@ -1,0 +1,40 @@
+version: "3"
+services:
+
+  db:
+    restart: always
+    image: mongo:3.6
+    networks:
+      - internal_network
+    ## Uncomment to enable DB persistance
+    # volumes:
+    #     - ./mongo:/data/db
+
+  es:
+    restart: always
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.1.3
+    environment:
+        - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    networks:
+        - internal_network
+    ## Uncomment to enable ES persistance
+    # volumes:
+    #     - ./elasticsearch:/usr/share/elasticsearch/data
+
+  web:
+    build: .
+    image: f0reachaar/abemagraph-ssr
+    restart: always
+    networks:
+        - external_network
+        - internal_network
+    ports:
+        - "8080:8080"
+    depends_on:
+        - db
+        - es
+
+networks:
+  external_network:
+  internal_network:
+    internal: true
